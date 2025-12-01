@@ -127,6 +127,29 @@ func TestAnalyze(t *testing.T) {
 		checkTypeCounts(t, got.TypeCounts, expected.TypeCounts)
 	})
 
+	t.Run("Caso metade int e metade string, mantém o primeiro tipo que apareceu", func(t *testing.T) {
+		input := Column{
+			"Animais",
+			[]string{"2", "  w ", "2.0 ", "    ", "5", "True", "jkjn", "kjnk", "7", ""},
+		}
+
+		got := AnalyzeColumn(input)
+
+		expected := ColumnResult{
+			Name:     "Animais",
+			MainType: "int",
+			Filled:   0.8,
+			TypeCounts: map[string]int{
+				"string": 3,
+				"bool":   1,
+				"int":    3,
+				"float":  1,
+			},
+		}
+		checkAnalyse(t, got, expected)
+		checkTypeCounts(t, got.TypeCounts, expected.TypeCounts)
+	})
+
 	t.Run("Caso da coluna vazia", func(t *testing.T) {
 		input := Column{
 			"Animais",
@@ -170,7 +193,7 @@ func TestAnalyze(t *testing.T) {
 		}
 
 		if got.Stats["Average"] != "20.00" {
-			t.Errorf("Integração falhou: Esperava Max 20.00, recebeu %s", got.Stats["Max"])
+			t.Errorf("Integração falhou: Esperava Average 20.00, recebeu %s", got.Stats["Average"])
 		}
 	})
 	

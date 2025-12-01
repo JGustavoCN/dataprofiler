@@ -15,45 +15,47 @@ type ColumnResult struct {
 	MainType   string
 	Filled     float64
 	TypeCounts map[string]int
-	Stats map[string]string
+	Stats      map[string]string
 }
 
 func AnalyzeColumn(column Column) (result ColumnResult) {
 	if len(column.Values) == 0 {
 		return
 	}
-	result.Name = column.Name
-	tipo := InferType(strings.TrimSpace(column.Values[0]))
-	tipos := map[string]int{
-		tipo: 0,
-	}
-	var stats []float64
-	empty := 0.0
+
+	typeCounts := make(map[string]int)
+	var numericValues []float64
+	filledCount := 0.0
 	for _, v := range column.Values {
-		trimv := strings.TrimSpace(v)
-		if trimv != "" {
-			key := InferType(trimv)
-			tipos[key] = tipos[key] + 1
-			if key == "float" || key == "int" {
-				number, _ := strconv.ParseFloat(trimv, 64)
-				stats = append(stats, number)
-			}
-		} else {
-			empty++
+		trimmed := strings.TrimSpace(v)
+		if trimmed == "" {
+			continue
+		}
+
+		inferredType := InferType(trimmed)
+		typeCounts[inferredType]++
+		if inferredType == "float" || inferredType == "int" {
+			number, _ := strconv.ParseFloat(trimmed, 64)
+			numericValues = append(numericValues, number)
+		}
+
+		filledCount++
+
+	}
+	counts := 0
+	for k, v := range typeCounts {
+		if v > counts {
+			result.MainType = k
+			counts = v
 		}
 	}
-	quantidade := tipos[tipo]
-	for k, v := range tipos {
-		if v > quantidade {
-			tipo = k
-		}
-	}
+
+	result.Name = column.Name
+	result.TypeCounts = typeCounts
 	
-	result.TypeCounts = tipos
-	result.MainType = tipo 
 	if result.MainType == "float" || result.MainType == "int" {
-		result.Stats = StatsCalc(stats)
+		result.Stats = StatsCalc(numericValues)
 	}
-	result.Filled = ((float64(len(column.Values)) - empty) / float64(len(column.Values)))
+	result.Filled = (filledCount / float64(len(column.Values)))
 	return
 }
