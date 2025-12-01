@@ -12,9 +12,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Idades",
-			MainType: "int",
-			Filled:   1,
+			Name:        "Idades",
+			MainType:    "int",
+			BlankCount:  0,
+			CountFilled: 3,
+			Filled:      1,
+			BlankRatio:  0,
 		}
 
 		checkAnalyse(t, got, expected)
@@ -29,9 +32,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Idades",
-			MainType: "int",
-			Filled:   0.75,
+			Name:        "Idades",
+			MainType:    "int",
+			BlankCount:  1,
+			CountFilled: 3,
+			Filled:      0.75,
+			BlankRatio:  0.25,
 		}
 
 		checkAnalyse(t, got, expected)
@@ -46,9 +52,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Idades",
-			MainType: "float",
-			Filled:   0.75,
+			Name:        "Idades",
+			MainType:    "float",
+			BlankCount:  1,
+			CountFilled: 3,
+			Filled:      0.75,
+			BlankRatio:  0.25,
 		}
 
 		checkAnalyse(t, got, expected)
@@ -63,9 +72,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Animais",
-			MainType: "string",
-			Filled:   0.75,
+			Name:        "Animais",
+			MainType:    "string",
+			BlankCount:  1,
+			CountFilled: 3,
+			Filled:      0.75,
+			BlankRatio:  0.25,
 		}
 
 		checkAnalyse(t, got, expected)
@@ -80,9 +92,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Animais",
-			MainType: "int",
-			Filled:   0.9,
+			Name:        "Animais",
+			MainType:    "int",
+			BlankCount:  1,
+			CountFilled: 9,
+			Filled:      0.9,
+			BlankRatio:  0.1,
 		}
 		checkAnalyse(t, got, expected)
 	})
@@ -113,9 +128,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Animais",
-			MainType: "int",
-			Filled:   0.9,
+			Name:        "Animais",
+			MainType:    "int",
+			BlankCount:  1,
+			CountFilled: 9,
+			Filled:      0.9,
+			BlankRatio:  0.1,
 			TypeCounts: map[string]int{
 				"string": 1,
 				"bool":   1,
@@ -136,9 +154,12 @@ func TestAnalyze(t *testing.T) {
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			Name:     "Animais",
-			MainType: "int",
-			Filled:   0.8,
+			Name:        "Animais",
+			MainType:    "int",
+			BlankCount:  2,
+			CountFilled: 8,
+			Filled:      0.8,
+			BlankRatio:  0.2,
 			TypeCounts: map[string]int{
 				"string": 3,
 				"bool":   1,
@@ -184,7 +205,7 @@ func TestAnalyze(t *testing.T) {
 	t.Run("Integração com StatsCalc em coluna numérica", func(t *testing.T) {
 		input := Column{
 			Name:   "Precos",
-			Values: []string{" 10", "20", "30"}, 
+			Values: []string{" 10", "20", "30"},
 		}
 
 		got := AnalyzeColumn(input)
@@ -196,7 +217,6 @@ func TestAnalyze(t *testing.T) {
 			t.Errorf("Integração falhou: Esperava Average 20.00, recebeu %s", got.Stats["Average"])
 		}
 	})
-	
 
 	t.Run("NÃO deve calcular Stats para String", func(t *testing.T) {
 		input := Column{
@@ -224,12 +244,26 @@ func checkAnalyse(t *testing.T, got, expected ColumnResult) {
 			t.Errorf("Tipo correto [esperado: %s - recebeu: %s]", expected.MainType, got.MainType)
 		}
 	})
-	t.Run("Valor de preenchimento correto", func(t *testing.T) {
+	t.Run("Contagem de vazios", func(t *testing.T) {
 		if got.Filled != expected.Filled {
 			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.Filled, got.Filled)
 		}
 	})
 
+	t.Run("Valores de preenchimento correto", func(t *testing.T) {
+		if got.CountFilled != expected.CountFilled {
+			t.Errorf("Contagem de preenchimento [esperado: %d - recebeu: %d]", expected.CountFilled, got.CountFilled)
+		}
+		if got.BlankCount != expected.BlankCount {
+			t.Errorf("Contagem de vazios [esperado: %d - recebeu: %d]", expected.BlankCount, got.BlankCount)
+		}
+		if got.Filled != expected.Filled {
+			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.Filled, got.Filled)
+		}
+		if got.BlankRatio != expected.BlankRatio {
+			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.BlankRatio, got.BlankRatio)
+		}
+	})
 }
 
 func checkTypeCounts(t *testing.T, got, expected map[string]int) {
