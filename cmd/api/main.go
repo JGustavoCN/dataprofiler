@@ -3,6 +3,59 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"github.com/JGustavoCN/dataprofiler/internal/infra"
+	"github.com/JGustavoCN/dataprofiler/internal/profiler"
+)
+
+func main() {
+	http.HandleFunc("/api/upload", uploadHandler)
+
+	fmt.Println("🚀 Servidor rodando na porta :8080")
+
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
+}
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+	r.ParseMultipartForm(10 << 20)
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Erro ao recuperar arquivo", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+	fmt.Printf("📂 Recebido arquivo: %s\n", handler.Filename)
+	columns, err := infra.ParseData(file)
+	if err != nil {
+		http.Error(w, "Erro ao processar CSV", http.StatusInternalServerError)
+		return
+	}
+	result := profiler.Profile(columns, handler.Filename)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(result); err != nil {
+		http.Error(w, "Erro ao gerar JSON", http.StatusInternalServerError)
+	}
+}
+
+/**
+import (
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
@@ -34,4 +87,4 @@ func main() {
 
 	fmt.Println("📊 Relatório Final:")
 	fmt.Println(string(jsonOutput))
-}
+}*/
