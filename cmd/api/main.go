@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	filePath := "C:\\Users\\joseg\\Downloads\\catalago_cursos.csv"
+	filePath := "produtos_teste.csv"
 
 	fmt.Println("🚀 Iniciando DataProfiler...")
 	fmt.Printf("📂 Lendo arquivo: %s\n", filePath)

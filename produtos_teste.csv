@@ -1,0 +1,11 @@
+id;nome;preco;ativo;estoque;codigo_ref;categoria;obs
+1;Café Premium;15.50;true;100;REF_001;Bebidas;
+2;Açúcar Cristal;5.90;true;50;REF_002;Alimentos;NULL
+3;Leite Integral;;false;0;202301;Bebidas;NA
+4;Biscoito Recheado;3.25;true;200;202302;Alimentos;Promoção
+5;Água Mineral;2.00;true;;REF_003;Bebidas;NULL
+6;Sabão em Pó;18.90;false;15;202304;Limpeza;
+7;Refrigerante;6.50;true;60;REF_005;Bebidas;Gelado
+8;Pão de Forma;7.00;false;0;202306;Alimentos;NULL
+9;Manteiga;9.90;true;30;REF_007;Alimentos;
+10;Queijo Mussarela;25.90;true;10;202308;Alimentos;NULL
