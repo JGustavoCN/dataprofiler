@@ -1,0 +1,219 @@
+/* ============================= */
+/*       APPLE DESIGN TOKENS     */
+/* ============================= */
+
+:root {
+  /* Cores inspiradas no macOS/iOS */
+  --apple-bg: rgba(255, 255, 255, 0.55);
+  --apple-bg-hover: rgba(255, 255, 255, 0.75);
+
+  --apple-border: rgba(255, 255, 255, 0.35);
+  --apple-border-strong: rgba(255, 255, 255, 0.65);
+
+  --apple-text: #1c1c1e;
+  --apple-text-secondary: #3a3a3c;
+
+  --apple-blue: #007aff;
+  --apple-blue-hover: #0066d6;
+
+  --apple-green: #34c759;
+  --apple-green-hover: #2dab4d;
+
+  /* Radius */
+  --apple-radius-lg: 20px;
+  --apple-radius-md: 12px;
+  --apple-radius-sm: 8px;
+  --apple-radius-round: 999px;
+
+  /* Spacing */
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-10: 40px;
+
+  /* Blur characteristic Apple */
+  --apple-blur: saturate(180%) blur(20px);
+
+  /* Sombras estilo Apple (suave e difusa) */
+  --shadow-apple: 0 8px 20px rgba(0,0,0,0.12);
+
+  /* Transitions */
+  --apple-transition: 280ms cubic-bezier(.25, .8, .25, 1);
+}
+
+/* Fonte recomendada (Apple SF Pro) */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+               "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #f2f2f7;
+  margin: 0;
+  min-height: 100vh; /* Ocupa 100% da altura da janela */
+  display: flex;     /* Ativa o Flexbox */
+  justify-content: center; /* Centraliza Horizontalmente */
+  align-items: center;
+}
+
+
+/* ============================= */
+/*         CONTAINER Apple       */
+/* ============================= */
+
+.uploader-container {
+  width: 90%;
+    
+    /* TRAVA: Impede que fique gigante em monitores grandes */
+    max-width: 500px; 
+    
+    /* MÁGICA: Garante que seja sempre um quadrado perfeito */
+    aspect-ratio: 1.5 / 1;
+  
+  border-radius: var(--apple-radius-lg);
+
+  padding: var(--space-10);
+  text-align: center;
+
+  background: var(--apple-bg);
+  backdrop-filter: var(--apple-blur);
+  -webkit-backdrop-filter: var(--apple-blur);
+
+  border: 1px solid var(--apple-border);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+
+  box-shadow: var(--shadow-apple);
+  transition: var(--apple-transition);
+}
+
+.uploader-container:hover {
+  background: var(--apple-bg-hover);
+  border-color: var(--apple-border-strong);
+}
+
+
+/* ============================= */
+/*         Texto Apple           */
+/* ============================= */
+
+.uploader-text {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  color: var(--apple-text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+
+/* ============================= */
+/*    INPUT estilo AppKit/iOS    */
+/* ============================= */
+
+/* Esconde o input real */
+.file-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+/* Botão Apple UI lindão */
+.file-btn-apple {
+  padding: 10px 24px;
+  background: var(--apple-green);
+  color: white;
+  border-radius: var(--apple-radius-round);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  transition: var(--apple-transition);
+  box-shadow: 0 4px 10px rgba(0,122,255,0.3);
+
+  /* evita selecionar texto */
+  user-select: none;
+}
+
+.file-btn-apple:hover {
+  background: var(--apple-green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,122,255,0.35);
+}
+
+.file-btn-apple:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 8px rgba(0,122,255,0.25);
+}
+
+
+
+/* ============================= */
+/*   BOTÃO Apple Blue (Aqua)     */
+/* ============================= */
+
+.upload-btn {
+  padding: var(--space-3) var(--space-5);
+  background: var(--apple-blue);
+  color: white;
+
+  border: none;
+  border-radius: var(--apple-radius-round);
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: var(--apple-transition);
+
+  box-shadow: 0 4px 10px rgba(0,122,255,0.3);
+}
+
+.upload-btn:hover {
+  background: var(--apple-blue-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,122,255,0.35);
+}
+
+.upload-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 8px rgba(0,122,255,0.25);
+}
+
+.upload-btn:disabled {
+  background: #9ec7ff;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+
+/* ============================= */
+/*   Mensagem de sucesso Apple   */
+/* ============================= */
+
+.success-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  margin-top: var(--space-3);
+
+  background: rgba(52,199,89,0.15);
+  color: var(--apple-green);
+
+  font-size: 0.95rem;
+  padding: var(--space-2) var(--space-4);
+
+  border-radius: var(--apple-radius-round);
+  border: 1px solid rgba(52,199,89,0.35);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow: 0 2px 6px rgba(52,199,89,0.2);
+}
