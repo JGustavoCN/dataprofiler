@@ -39,17 +39,26 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	fmt.Printf("📂 Recebido arquivo: %s\n", handler.Filename)
+
+	fmt.Println("============ Começo do parse")
 	columns, err := infra.ParseData(file)
 	if err != nil {
+		fmt.Println("Erro ao processar CSV", err.Error())
 		http.Error(w, "Erro ao processar CSV", http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("============ Terminou o parse")
+
+	fmt.Println("============ Começo do profile")
 	result := profiler.Profile(columns, handler.Filename)
+	fmt.Println("============ Terminou o profile")
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		http.Error(w, "Erro ao gerar JSON", http.StatusInternalServerError)
 	}
+	fmt.Println("Terminou o envio do json")
 }
 
 /**

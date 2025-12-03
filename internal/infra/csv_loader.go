@@ -24,12 +24,11 @@ func LoadCSV(filePath string) ([]profiler.Column, string, error) {
 }
 
 func ParseData(file io.Reader) ([]profiler.Column, error) {
-	deco :=charmap.Windows1252.NewDecoder()
+	deco := charmap.Windows1252.NewDecoder()
 	file = transform.NewReader(file, deco)
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
 	reader.LazyQuotes = true
-
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
