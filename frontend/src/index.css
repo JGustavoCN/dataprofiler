@@ -1,0 +1,40 @@
+:root {
+  --apple-bg: rgba(255, 255, 255, 0.55);
+  --apple-bg-hover: rgba(255, 255, 255, 0.75);
+
+  --apple-border: rgba(255, 255, 255, 0.35);
+  --apple-border-strong: rgba(255, 255, 255, 0.65);
+
+  --apple-text: #1c1c1e;
+  --apple-text-secondary: #3a3a3c;
+
+  --apple-blue: #007aff;
+  --apple-blue-hover: #0066d6;
+
+  --apple-green: #34c759;
+  --apple-green-hover: #2dab4d;
+
+  --apple-radius-lg: 20px;
+  --apple-radius-md: 12px;
+  --apple-radius-sm: 8px;
+  --apple-radius-round: 999px;
+
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-10: 50px;
+
+  --apple-blur: saturate(180%) blur(20px);
+
+  --shadow-apple: 0 8px 20px rgba(0, 0, 0, 0.12);
+  --apple-transition: 280ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #f2f2f7;
+  color: var(--apple-text);
+  -webkit-font-smoothing: antialiased;
+}

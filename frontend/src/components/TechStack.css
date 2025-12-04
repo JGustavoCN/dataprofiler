@@ -1,0 +1,53 @@
+.tech-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--apple-text-secondary);
+
+  background: var(--apple-bg);
+  padding: 6px 12px;
+  border-radius: var(--apple-radius-round);
+  border: 1px solid var(--apple-border);
+  backdrop-filter: var(--apple-blur);
+  transition: var(--apple-transition);
+}
+
+.tech-item:hover {
+  background: var(--apple-bg-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tech-icon {
+  width: 50px;
+  height: 50px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tech-item:hover .tech-icon {
+  transform: scale(1.2);
+}
+
+.icon-react:hover {
+  filter: drop-shadow(0 0 8px rgba(97, 218, 251, 0.6));
+}
+.icon-vite:hover {
+  filter: drop-shadow(0 0 8px rgba(100, 108, 255, 0.6));
+}
+.icon-golang:hover {
+  filter: drop-shadow(0 0 8px rgba(30, 146, 247, 0.6));
+}
+.icon-swc:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.6));
+}
