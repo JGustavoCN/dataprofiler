@@ -1,0 +1,47 @@
+
+.wrapper{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  box-shadow: inset -1px -1px 1px var(--apple-bg), 
+  inset 1px 1px 1px rgba(0, 0 ,0, 0.12);
+  
+}
+
+.wrapper::before{
+  content: '';
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  box-shadow: -1px -1px 1px var(--apple-bg),
+   1px 1px 1px rgba(0, 0 ,0, 0.12);
+  
+}
+
+.wrapper span{
+  position: absolute;
+  height: 23.5px;
+  width: 23.5px;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate{
+  100%{
+    transform: rotate(360deg);
+  }
+}
+
+.wrapper span::before{
+  content: '';
+  position: absolute;
+  
+  height: 4px;
+  width: 4px;
+  background: white;
+  border-radius: 50%;
+}

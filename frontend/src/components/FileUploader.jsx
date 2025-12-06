@@ -1,5 +1,6 @@
 import React from "react";
 import "./FileUploader.css";
+import Spinner from "./Spinner";
 
 function FileUploader({ loading, handleUpload, file, setFile }) {
   const handleFileChange = (e) => {
@@ -31,7 +32,14 @@ function FileUploader({ loading, handleUpload, file, setFile }) {
         disabled={loading}
         className="upload-btn"
       >
-        {loading ? "⏳ Processando..." : "🚀 Analisar Arquivo"}
+        {loading ? (
+          <div className="container-generic">
+            <Spinner/>
+            Analisar Arquivo
+          </div>
+        ) : (
+          "🚀 Analisar Arquivo"
+        )}
       </button>
 
       {file && (

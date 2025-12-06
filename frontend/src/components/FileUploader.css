@@ -131,3 +131,9 @@
 
   box-shadow: 0 2px 6px rgba(52, 199, 89, 0.2);
 }
+
+.container-generic{
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
