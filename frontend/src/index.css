@@ -37,4 +37,5 @@ body {
   background: #f2f2f7;
   color: var(--apple-text);
   -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
