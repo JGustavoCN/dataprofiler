@@ -1,36 +1,46 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
 	"github.com/JGustavoCN/dataprofiler/internal/profiler"
 )
 
 func main() {
-	http.HandleFunc("/api/upload", uploadHandler)
+	mux := http.NewServeMux()
 
-	fmt.Println("🚀 Servidor rodando na porta :8080")
+	mux.HandleFunc("/api/upload", uploadHandler)
+	handlerComCORS := CORSMiddleware(mux)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	srv := &http.Server{
+		Addr:         ":8080",
+		Handler:      handlerComCORS,
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 5 * time.Minute,
+		IdleTimeout:  600 * time.Second,
+	}
+	fmt.Println("🚀 Servidor Blindado rodando na porta :8080")
+
+	if err := srv.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	defer cancel()
+
 	r.ParseMultipartForm(10 << 20)
 	file, handler, err := r.FormFile("file")
 	if err != nil {
@@ -40,25 +50,68 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	fmt.Printf("📂 Recebido arquivo: %s\n", handler.Filename)
 
-	fmt.Println("============ Começo do parse")
-	columns, err := infra.ParseData(file)
-	if err != nil {
-		fmt.Println("Erro ao processar CSV", err.Error())
-		http.Error(w, "Erro ao processar CSV", http.StatusInternalServerError)
+	type processingResult struct {
+		data interface{}
+		err  error
+	}
+
+	done := make(chan processingResult)
+
+	go func() {
+
+		fmt.Println("============ Começo do parse")
+
+		columns, err := infra.ParseData(file)
+		if err != nil {
+			done <- processingResult{err: err}
+			return
+		}
+		fmt.Println("============ Terminou o parse")
+
+		fmt.Println("============ Começo do profile")
+		result := profiler.Profile(columns, handler.Filename)
+		done <- processingResult{data: result}
+		fmt.Println("============ Terminou o profile")
+	}()
+
+	select {
+	case res := <-done:
+		if res.err != nil {
+			fmt.Println("❌ Erro interno no processamento")
+			http.Error(w, "Erro ao processar CSV: "+res.err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("Preparação e envio do json")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(res.data); err != nil {
+			http.Error(w, "Erro ao gerar JSON", http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("Terminou o envio do json")
+
+	case <-ctx.Done():
+		fmt.Println("⏱️ Timeout Lógico atingido! Cancelando resposta.")
+		http.Error(w, "O processamento demorou demais e foi cancelado.", http.StatusGatewayTimeout)
 		return
 	}
-	fmt.Println("============ Terminou o parse")
 
-	fmt.Println("============ Começo do profile")
-	result := profiler.Profile(columns, handler.Filename)
-	fmt.Println("============ Terminou o profile")
+}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(result); err != nil {
-		http.Error(w, "Erro ao gerar JSON", http.StatusInternalServerError)
-	}
-	fmt.Println("Terminou o envio do json")
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, DELETE, PUT")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+
+	})
+
 }
 
 /**

@@ -47,23 +47,43 @@ function App() {
     }
 
     setLoading(true);
+    setError("");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300000);
+
     const formData = new FormData();
     formData.append("file", file);
-    setError("");
+
     try {
       const response = await fetch("http://localhost:8080/api/upload", {
         method: "POST",
         body: formData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error("Erro no upload");
+        const msgError = await response.text();
+        throw new Error("Erro no upload: " + msgError);
       }
+
       const result = await response.json();
       setData(result);
       console.log("Sucesso:", result);
     } catch (error) {
-      console.error("Erro:", error);
-      setError("Erro ao enviar arquivo. O servidor Go está rodando?");
+      console.error("Erro capturado:", error);
+
+      if (error.name === "AbortError") {
+        setError("A requisição demorou demais e foi cancelada pelo navegador.");
+      } else if (error.message === "Failed to fetch") {
+        setError(
+          "Erro de Conexão: O servidor demorou para responder ou está offline (Timeout)."
+        );
+      } else {
+        setError(error.message || "Erro desconhecido ao enviar arquivo.");
+      }
     } finally {
       setLoading(false);
     }
