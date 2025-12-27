@@ -78,3 +78,27 @@ Maria;25;Lisboa`
 		}
 	})
 }
+
+
+func TestLoadCSVAsync(t *testing.T) {
+	csvContent := "nome;idade\nJoao;30"
+	reader := strings.NewReader(csvContent)
+
+	headers, dataChan, err := ParseDataAsync(reader)
+
+	if err != nil {
+		t.Fatalf("Erro inesperado: %v", err)
+	}
+
+	if headers[0] != "nome" {
+		t.Errorf("Esperado header 'nome', recebido '%s'", headers[0])
+	}
+
+	row1, ok := <-dataChan
+	if !ok {
+		t.Fatal("Canal fechou antes de entregar os dados")
+	}
+	if row1[0] != "Joao" {
+		t.Errorf("Esperado dado 'Joao', recebido '%s'", row1[0])
+	}
+}
