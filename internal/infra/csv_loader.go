@@ -57,3 +57,36 @@ func ParseData(file io.Reader) ([]profiler.Column, error) {
 
 	return columns, nil
 }
+
+func ParseDataAsync(r io.Reader) ([]string, <-chan []string, error) {
+	out := make(chan []string, 100)
+
+	deco := charmap.Windows1252.NewDecoder()
+	tr := transform.NewReader(r, deco)
+	reader := csv.NewReader(tr)
+	reader.Comma = ';'
+	reader.LazyQuotes = true
+
+	
+	headers, err := reader.Read()
+	if err != nil {
+		close(out)           
+		return nil, nil, err 
+	}
+
+	go func() {
+		defer close(out)
+		for {
+			record, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				continue
+			}
+			out <- record
+		}
+	}()
+
+	return headers, out, nil
+}

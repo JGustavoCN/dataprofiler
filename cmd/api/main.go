@@ -15,6 +15,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/upload", uploadHandler)
+	mux.HandleFunc("/api/uploadStreaming", uploadHandlerStreaming)
 	handlerComCORS := CORSMiddleware(mux)
 
 	srv := &http.Server{
@@ -31,6 +32,62 @@ func main() {
 	}
 }
 
+func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
+	defer cancel()
+
+	r.ParseMultipartForm(10 << 20)
+
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Erro ao recuperar arquivo", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	fmt.Printf("📂 Recebido arquivo: %s (Streaming)\n", handler.Filename)
+
+	headers, dataChan, err := infra.ParseDataAsync(file)
+	if err != nil {
+		fmt.Println("Erro ao iniciar leitura do CSV:", err)
+		http.Error(w, "Erro ao ler CSV", http.StatusInternalServerError)
+		return
+	}
+
+	type processingResult struct {
+		data interface{}
+	}
+	done := make(chan processingResult)
+
+	go func() {
+		fmt.Println("🔄 Iniciando processamento via Stream...")
+		res := profiler.ProfileAsync(headers, dataChan, handler.Filename)
+		done <- processingResult{data: res}
+		close(done)
+	}()
+
+	select {
+	case res := <-done:
+		fmt.Println("✅ Processamento concluído com sucesso!")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(res.data); err != nil {
+			fmt.Println("Erro ao codificar JSON:", err)
+		}
+
+	case <-ctx.Done():
+		fmt.Println("⏱️ Timeout! O processamento demorou demais.")
+		http.Error(w, "Timeout no processamento", http.StatusGatewayTimeout)
+		return
+	}
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
@@ -38,10 +95,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
 	defer cancel()
 
 	r.ParseMultipartForm(10 << 20)
+
 	file, handler, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, "Erro ao recuperar arquivo", http.StatusBadRequest)
