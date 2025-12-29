@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"golang.org/x/text/encoding/charmap"
@@ -162,4 +163,96 @@ func TestSmartReader(t *testing.T){
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", input, got)
 		}	
 	})
+}
+
+func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
+	testCases := []struct {
+		name      string
+		content   string
+		expected  int 
+	}{
+		{
+			name:     "Separado por Ponto e Vírgula (Padrão Excel BR)",
+			content:  "nome;idade\nJoao;30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Vírgula (Padrão US)",
+			content:  "nome,idade\nJoao,30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Pipe",
+			content:  "nome|idade\nJoao|30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Tab",
+			content:  "nome\tidade\nJoao\t30",
+			expected: 2,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			reader := strings.NewReader(tc.content)
+			
+			headers, _, err := ParseDataAsync(reader)
+			
+			if err != nil {
+				t.Fatalf("Erro inesperado: %v", err)
+			}
+
+			if len(headers) != tc.expected {
+				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v", 
+					tc.expected, len(headers), headers)
+			}
+		})
+	}
+}
+
+func TestParseData_ShouldDetectSeparators(t *testing.T) {
+	testCases := []struct {
+		name      string
+		content   string
+		expected  int 
+	}{
+		{
+			name:     "Separado por Ponto e Vírgula (Padrão Excel BR)",
+			content:  "nome;idade\nJoao;30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Vírgula (Padrão US)",
+			content:  "nome,idade\nJoao,30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Pipe",
+			content:  "nome|idade\nJoao|30",
+			expected: 2,
+		},
+		{
+			name:     "Separado por Tab",
+			content:  "nome\tidade\nJoao\t30",
+			expected: 2,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			reader := strings.NewReader(tc.content)
+			
+			headers, err := ParseData(reader)
+			
+			if err != nil {
+				t.Fatalf("Erro inesperado: %v", err)
+			}
+
+			if len(headers) != tc.expected {
+				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v", 
+					tc.expected, len(headers), headers)
+			}
+		})
+	}
 }

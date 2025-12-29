@@ -31,8 +31,16 @@ func ParseData(file io.Reader) ([]profiler.Column, error) {
 	if err != nil {
 		return nil, err
 	}
-	reader := csv.NewReader(smartReader)
-	reader.Comma = ';'
+
+	bufferedSmartReader := bufio.NewReader(smartReader)
+	
+	separator, err := DetectSeparator(bufferedSmartReader)
+	if err != nil {
+		separator = ';' 
+	}
+
+	reader := csv.NewReader(bufferedSmartReader)
+	reader.Comma = separator
 	reader.LazyQuotes = true
 	records, err := reader.ReadAll()
 	if err != nil {
@@ -71,8 +79,15 @@ func ParseDataAsync(r io.Reader) ([]string, <-chan []string, error) {
 		close(out)
 		return nil, nil, err
 	}
-	reader := csv.NewReader(smartReader)
-	reader.Comma = ';'
+
+	bufferedSmartReader := bufio.NewReader(smartReader)
+	separator, err := DetectSeparator(bufferedSmartReader)
+	if err != nil {
+		separator = ';' 
+	}
+
+	reader := csv.NewReader(bufferedSmartReader)
+	reader.Comma = separator
 	reader.LazyQuotes = true
 
 	
@@ -113,4 +128,52 @@ func NewSmartReader(r io.Reader) (io.Reader, error) {
 
 	decoderReader := transform.NewReader(br, charmap.Windows1252.NewDecoder())
 	return decoderReader, nil
+}
+
+
+
+func DetectSeparator(r *bufio.Reader) (rune, error) {
+	
+	bytesToPeek, err := r.Peek(2048) 
+	if err != nil && err != io.EOF {
+		return ';', err 
+	}
+
+	semicolonCount := 0 // ;
+	commaCount := 0     // ,
+	pipeCount := 0      // |
+	tabCount := 0       // \t
+
+	for _, b := range bytesToPeek {
+		if b == '\n' || b == '\r' {
+			break
+		}
+		switch b {
+		case ';':
+			semicolonCount++
+		case ',':
+			commaCount++
+		case '|':
+			pipeCount++
+		case '\t':
+			tabCount++
+		}
+	}
+
+	separator := ';'
+	maxCount := semicolonCount
+
+	if commaCount > maxCount {
+		maxCount = commaCount
+		separator = ','
+	}
+	if pipeCount > maxCount {
+		maxCount = pipeCount
+		separator = '|'
+	}
+	if tabCount > maxCount {
+		separator = '\t'
+	}
+
+	return separator, nil
 }
