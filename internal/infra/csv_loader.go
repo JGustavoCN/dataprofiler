@@ -1,10 +1,13 @@
 package infra
 
 import (
+	"bufio"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"unicode/utf8"
 
 	"github.com/JGustavoCN/dataprofiler/internal/profiler"
 	"golang.org/x/text/encoding/charmap"
@@ -24,9 +27,11 @@ func LoadCSV(filePath string) ([]profiler.Column, string, error) {
 }
 
 func ParseData(file io.Reader) ([]profiler.Column, error) {
-	deco := charmap.Windows1252.NewDecoder()
-	file = transform.NewReader(file, deco)
-	reader := csv.NewReader(file)
+	smartReader, err := NewSmartReader(file)
+	if err != nil {
+		return nil, err
+	}
+	reader := csv.NewReader(smartReader)
 	reader.Comma = ';'
 	reader.LazyQuotes = true
 	records, err := reader.ReadAll()
@@ -61,9 +66,12 @@ func ParseData(file io.Reader) ([]profiler.Column, error) {
 func ParseDataAsync(r io.Reader) ([]string, <-chan []string, error) {
 	out := make(chan []string, 100)
 
-	deco := charmap.Windows1252.NewDecoder()
-	tr := transform.NewReader(r, deco)
-	reader := csv.NewReader(tr)
+	smartReader, err := NewSmartReader(r)
+	if err != nil {
+		close(out)
+		return nil, nil, err
+	}
+	reader := csv.NewReader(smartReader)
 	reader.Comma = ';'
 	reader.LazyQuotes = true
 
@@ -73,7 +81,7 @@ func ParseDataAsync(r io.Reader) ([]string, <-chan []string, error) {
 		close(out)           
 		return nil, nil, err 
 	}
-
+	fmt.Println("✅ Header lido com sucesso!")
 	go func() {
 		defer close(out)
 		for {
@@ -89,4 +97,20 @@ func ParseDataAsync(r io.Reader) ([]string, <-chan []string, error) {
 	}()
 
 	return headers, out, nil
+}
+
+
+func NewSmartReader(r io.Reader) (io.Reader, error) {
+	br := bufio.NewReader(r)
+	bytesTosample , err := br.Peek(1024)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+
+	if utf8.Valid(bytesTosample) {
+		return br, nil
+	}	
+
+	decoderReader := transform.NewReader(br, charmap.Windows1252.NewDecoder())
+	return decoderReader, nil
 }

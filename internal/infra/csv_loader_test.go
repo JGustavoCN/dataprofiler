@@ -1,9 +1,13 @@
 package infra
 
 import (
+	"bytes"
+	"io"
 	"os"
-	"strings"
 	"testing"
+
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 func TestLoadCSV(t *testing.T) {
@@ -50,9 +54,11 @@ Maria;25;Lisboa`
 func TestParseData(t *testing.T) {
 	content := `Nome;Idade;Cidade
 Joao;30;Aracaju
-Maria;25;Lisboa`
+Olá, João! © 2024;25;Lisboa`
 
-	reader := strings.NewReader(content)
+
+	win1252Bytes := toWindows1252(content)
+	reader := bytes.NewReader(win1252Bytes)
 	columns, err := ParseData(reader)
 
 	if err != nil {
@@ -77,13 +83,20 @@ Maria;25;Lisboa`
 			t.Errorf("Valor errado. Esperava Joao, veio %s", col.Values[0])
 		}
 	})
+
+	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
+		got := columns[0]
+		if got.Values[1] != "Olá, João! © 2024" {
+			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", got.Values[1])
+		}	
+	})
 }
 
 
-func TestLoadCSVAsync(t *testing.T) {
-	csvContent := "nome;idade\nJoao;30"
-	reader := strings.NewReader(csvContent)
-
+func TestParseDataAsync(t *testing.T) {
+	csvContent := "nome;idade\nOlá, João! © 2024;30"
+	win1252Bytes := toWindows1252(csvContent)
+	reader := bytes.NewReader(win1252Bytes)
 	headers, dataChan, err := ParseDataAsync(reader)
 
 	if err != nil {
@@ -98,7 +111,55 @@ func TestLoadCSVAsync(t *testing.T) {
 	if !ok {
 		t.Fatal("Canal fechou antes de entregar os dados")
 	}
-	if row1[0] != "Joao" {
-		t.Errorf("Esperado dado 'Joao', recebido '%s'", row1[0])
+	if row1[1] != "30" {
+		t.Errorf("Esperado dado '30', recebido '%s'", row1[1])
 	}
+
+	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
+		if  row1[0] != "Olá, João! © 2024" {
+			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", row1[0])
+		}	
+	})
+}
+
+
+func toWindows1252(s string) []byte {
+	encoder := charmap.Windows1252.NewEncoder()
+	b, _, _ := transform.Bytes(encoder, []byte(s))
+	return b
+}
+
+func TestSmartReader(t *testing.T){
+	t.Run("Deve detectar e ler UTF-8 corretamente", func(t *testing.T) {
+		input := "Olá, João! © 2024"
+		reader := bytes.NewBuffer([]byte(input))
+		
+		smartReader, err := NewSmartReader(reader)
+		if err != nil {
+			t.Fatalf("Erro ao criar smart reader: %v", err)
+		}
+		
+		content, _ := io.ReadAll(smartReader)
+		got := string(content)
+
+		if got != input {
+			t.Errorf("Falha no UTF-8. Esperado: %s, Recebido: %s", input, got)
+		}
+	})
+
+	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
+		input := "Olá, João! © 2024"
+		win1252Bytes := toWindows1252(input)
+		reader := bytes.NewReader(win1252Bytes)
+
+		smartReader, err := NewSmartReader(reader)
+		if err != nil {
+			t.Fatalf("Erro ao criar smart reader: %v", err)
+		}
+		content, _ := io.ReadAll(smartReader)
+		got := string(content)
+		if got != input {
+			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", input, got)
+		}	
+	})
 }

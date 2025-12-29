@@ -41,7 +41,6 @@ func ProfileAsync(headers []string, dataChan <-chan []string, fileName string) (
 	}
 
 	rowCount := 0
-
 	for record := range dataChan {
 		rowCount++
 		for i, value := range record {
@@ -52,9 +51,9 @@ func ProfileAsync(headers []string, dataChan <-chan []string, fileName string) (
 	}
 
 	columnResults := make([]ColumnResult, len(headers))
-
 	for i, acc := range accumulators{
 		columnResults[i] = acc.Result()
+		fmt.Printf("---- ✅ Coluna %d lida com sucesso!\n", i+1)
 	}
 
 	fmt.Printf("✅ Processamento Async concluído: %d linhas processadas.\n", rowCount)

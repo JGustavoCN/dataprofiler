@@ -14,8 +14,8 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/upload", uploadHandler)
-	mux.HandleFunc("/api/uploadStreaming", uploadHandlerStreaming)
+	mux.HandleFunc("/api/uploadDeprecated", uploadHandlerDeprecated)
+	mux.HandleFunc("/api/upload", uploadHandlerStreaming)
 	handlerComCORS := CORSMiddleware(mux)
 
 	srv := &http.Server{
@@ -52,20 +52,21 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	fmt.Printf("📂 Recebido arquivo: %s (Streaming)\n", handler.Filename)
-
+	fmt.Println("🚩 ============ Começo do parse async")
 	headers, dataChan, err := infra.ParseDataAsync(file)
+	
 	if err != nil {
 		fmt.Println("Erro ao iniciar leitura do CSV:", err)
 		http.Error(w, "Erro ao ler CSV", http.StatusInternalServerError)
 		return
 	}
-
 	type processingResult struct {
 		data interface{}
 	}
 	done := make(chan processingResult)
 
 	go func() {
+		fmt.Println("🚩 ============ Começo do profile")
 		fmt.Println("🔄 Iniciando processamento via Stream...")
 		res := profiler.ProfileAsync(headers, dataChan, handler.Filename)
 		done <- processingResult{data: res}
@@ -88,7 +89,7 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
