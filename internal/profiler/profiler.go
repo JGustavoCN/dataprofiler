@@ -63,6 +63,9 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []strin
 				accumulators[i].Add(value)
 			}
 		}
+
+		PutRowSlice(record)
+
 		if rowCount % 200000 == 0 {
 			logger.Info("Processamento em andamento", "rows_processed", rowCount)
 		}

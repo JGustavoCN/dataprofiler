@@ -110,7 +110,7 @@ func ParseDataAsync(logger *slog.Logger, r io.Reader) ([]string, <-chan []string
 	reader := csv.NewReader(bufferedSmartReader)
 	reader.Comma = separator
 	reader.LazyQuotes = true
-
+	reader.ReuseRecord = true
 	
 	headers, err := reader.Read()
 	if err != nil {
@@ -140,7 +140,11 @@ func ParseDataAsync(logger *slog.Logger, r io.Reader) ([]string, <-chan []string
 				errorCount++
 				continue
 			}
-			out <- record
+
+			rowCopy := profiler.GetRowSlice()
+			rowCopy = append(rowCopy, record...)
+
+			out <- rowCopy
 			count++
 		}
 		logger.Info("Streaming finalizado", 
