@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
@@ -46,12 +49,31 @@ func main() {
 		WriteTimeout: 5 * time.Minute,
 		IdleTimeout:  600 * time.Second,
 	}
-	slog.Info("Servidor pronto e escutando", "addr", ":8080")
 
-	if err := srv.ListenAndServe(); err != nil {
-		slog.Error("Servidor caiu", "error", err)
-		os.Exit(1)
+	go func (){
+		slog.Info("Servidor pronto e escutando", "addr", ":8080")
+
+		if err := srv.ListenAndServe(); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				slog.Error("Servidor caiu", "error", err)
+				os.Exit(1)
+			}
+		}
+	}()
+
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
+
+	<-stopChan
+	slog.Warn("Sinal de desligamento recebido! Iniciando Graceful Shutdown...")
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("Erro forçando desligamento do servidor", "error", err)
+	} else {
+		slog.Info("Servidor desligado com sucesso (Gracefully)")
 	}
+
 }
 
 func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +116,7 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
         "filename", handler.Filename,
         "size_bytes", handler.Size,
     )
-	headers, dataChan, err := infra.ParseDataAsync(log, file)
+	headers, dataChan, err := infra.ParseDataAsync(ctx, log, file)
 	
 	if err != nil {
 		log.Error("Erro crítico no parser", "error", err)

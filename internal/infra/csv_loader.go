@@ -2,6 +2,7 @@ package infra
 
 import (
 	"bufio"
+	"context"
 	"encoding/csv"
 	"io"
 	"log/slog"
@@ -86,7 +87,7 @@ func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
 	return columns, nil
 }
 
-func ParseDataAsync(logger *slog.Logger, r io.Reader) ([]string, <-chan []string, error) {
+func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]string, <-chan []string, error) {
 	if logger == nil { 
 		logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) 
 	}
@@ -128,29 +129,36 @@ func ParseDataAsync(logger *slog.Logger, r io.Reader) ([]string, <-chan []string
 		count := 0
 		errorCount := 0
 		for {
-			record, err := reader.Read()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				logger.Warn("Erro ao ler linha CSV", 
-						"line_attempt", count + errorCount,
-						"error", err,
-				)
-				errorCount++
-				continue
-			}
+			select {
+			case <-ctx.Done():
+				logger.Warn("Leitura cancelada pelo contexto")
+				return
+			default:
+				record, err := reader.Read()
+				if err == io.EOF {
+					goto EndProcessing
+				}
+				if err != nil {
+					logger.Warn("Erro ao ler linha CSV", 
+							"line_attempt", count + errorCount,
+							"error", err,
+					)
+					errorCount++
+					continue
+				}
 
-			rowCopy := profiler.GetRowSlice()
-			rowCopy = append(rowCopy, record...)
+				rowCopy := profiler.GetRowSlice()
+				rowCopy = append(rowCopy, record...)
 
-			out <- rowCopy
-			count++
+				out <- rowCopy
+				count++
+			
+			}
 		}
-		logger.Info("Streaming finalizado", 
-			"total_rows_read", count-1,
-			"total_errors", errorCount,
-		)
+		EndProcessing: logger.Info("Streaming finalizado", 
+				"total_rows_read", count-1,
+				"total_errors", errorCount,
+			)
 	}()
 
 	return headers, out, nil

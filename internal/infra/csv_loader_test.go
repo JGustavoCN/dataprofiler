@@ -2,6 +2,7 @@ package infra
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"log/slog"
 	"os"
@@ -102,7 +103,7 @@ func TestParseDataAsync(t *testing.T) {
 	csvContent := "nome;idade\nOlá, João! © 2024;30"
 	win1252Bytes := toWindows1252(csvContent)
 	reader := bytes.NewReader(win1252Bytes)
-	headers, dataChan, err := ParseDataAsync(logger, reader)
+	headers, dataChan, err := ParseDataAsync(context.Background(), logger, reader)
 
 	if err != nil {
 		t.Fatalf("Erro inesperado: %v", err)
@@ -204,7 +205,7 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.content)
 			
-			headers, _, err := ParseDataAsync(logger, reader)
+			headers, _, err := ParseDataAsync(context.Background(), logger, reader)
 			
 			if err != nil {
 				t.Fatalf("Erro inesperado: %v", err)
