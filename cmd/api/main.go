@@ -3,8 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
@@ -12,6 +13,18 @@ import (
 )
 
 func main() {
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
+	slog.SetDefault(logger)
+
+	slog.Info(
+		"Iniciando servidor DataProfiler", 
+        "port", 8080, 
+        "env", "production",
+        "version", "v1.0.0",
+	)
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/uploadDeprecated", uploadHandlerDeprecated)
@@ -25,16 +38,29 @@ func main() {
 		WriteTimeout: 5 * time.Minute,
 		IdleTimeout:  600 * time.Second,
 	}
-	fmt.Println("🚀 Servidor Blindado rodando na porta :8080")
+	slog.Info("Servidor pronto e escutando", "addr", ":8080")
 
 	if err := srv.ListenAndServe(); err != nil {
-		panic(err)
+		slog.Error("Servidor caiu", "error", err)
+		os.Exit(1)
 	}
 }
 
 func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 
+	requestID := time.Now().UnixNano()
+
+	log := slog.With(
+		"req_id", requestID,
+		"method", r.Method,
+		"path", r.URL.Path,
+	)
+
+	log.Info("Nova requisição de upload recebida")
+	defer log.Info("Finalizando requisição de upload")
+
 	if r.Method != http.MethodPost {
+		log.Warn("Tentativa de método inválido")
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
@@ -42,22 +68,29 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
 	defer cancel()
 
-	r.ParseMultipartForm(10 << 20)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		log.Error("Erro parse form", "error", err)
+		http.Error(w, "Erro", http.StatusBadRequest)
+		return
+	}
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
+		log.Error("Falha ao recuperar arquivo do form", "error", err)
 		http.Error(w, "Erro ao recuperar arquivo", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	fmt.Printf("📂 Recebido arquivo: %s (Streaming)\n", handler.Filename)
-	fmt.Println("🚩 ============ Começo do parse async")
-	headers, dataChan, err := infra.ParseDataAsync(file)
+	log.Info("Iniciando processamento de arquivo",
+        "filename", handler.Filename,
+        "size_bytes", handler.Size,
+    )
+	headers, dataChan, err := infra.ParseDataAsync(log, file)
 	
 	if err != nil {
-		fmt.Println("Erro ao iniciar leitura do CSV:", err)
-		http.Error(w, "Erro ao ler CSV", http.StatusInternalServerError)
+		log.Error("Erro crítico no parser", "error", err)
+		http.Error(w, "Erro ao ler", http.StatusInternalServerError)
 		return
 	}
 	type processingResult struct {
@@ -66,24 +99,29 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	done := make(chan processingResult)
 
 	go func() {
-		fmt.Println("🚩 ============ Começo do profile")
-		fmt.Println("🔄 Iniciando processamento via Stream...")
-		res := profiler.ProfileAsync(headers, dataChan, handler.Filename)
+		log.Info("Iniciando profile async em background...")
+		res := profiler.ProfileAsync(log, headers, dataChan, handler.Filename)
 		done <- processingResult{data: res}
 		close(done)
 	}()
 
 	select {
 	case res := <-done:
-		fmt.Println("✅ Processamento concluído com sucesso!")
+		log.Info("Sucesso", 
+            "filename", handler.Filename,
+            "duration_ms", "TODO: Medir tempo",
+        )
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(res.data); err != nil {
-			fmt.Println("Erro ao codificar JSON:", err)
+			log.Error("Erro ao codificar JSON de resposta", "error", err)
 		}
 
 	case <-ctx.Done():
-		fmt.Println("⏱️ Timeout! O processamento demorou demais.")
+		log.Warn("Timeout no processamento", 
+            "filename", handler.Filename, 
+            "timeout_limit", "10m",
+        )
 		http.Error(w, "Timeout no processamento", http.StatusGatewayTimeout)
 		return
 	}
@@ -91,7 +129,20 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 
 func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 
+	requestID := time.Now().UnixNano()
+
+	log := slog.With(
+		"req_id", requestID,
+		"method", r.Method,
+		"path", r.URL.Path,
+		"handler", "deprecated",
+	)
+
+	log.Info("Nova requisição recebida (Deprecated)")
+	defer log.Info("Finalizando requisição (Deprecated)")
+
 	if r.Method != http.MethodPost {
+		log.Warn("Tentativa de método inválido")
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
@@ -99,15 +150,23 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
 	defer cancel()
 
-	r.ParseMultipartForm(10 << 20)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		log.Error("Erro parse form", "error", err)
+		http.Error(w, "Erro", http.StatusBadRequest)
+		return
+	}
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
+		log.Error("Falha ao recuperar arquivo do form", "error", err)
 		http.Error(w, "Erro ao recuperar arquivo", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
-	fmt.Printf("📂 Recebido arquivo: %s\n", handler.Filename)
+	log.Info("Iniciando processamento de arquivo",
+        "filename", handler.Filename,
+        "size_bytes", handler.Size,
+    )
 
 	type processingResult struct {
 		data interface{}
@@ -118,39 +177,44 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 
-		fmt.Println("============ Começo do parse")
+		log.Info("Iniciando Parse Síncrono")
 
-		columns, err := infra.ParseData(file)
+		columns, err := infra.ParseData(log, file)
 		if err != nil {
 			done <- processingResult{err: err}
 			return
 		}
-		fmt.Println("============ Terminou o parse")
-
-		fmt.Println("============ Começo do profile")
-		result := profiler.Profile(columns, handler.Filename)
+		log.Info("Parse finalizado. Iniciando Profile Síncrono")
+		result := profiler.Profile(log, columns, handler.Filename)
 		done <- processingResult{data: result}
-		fmt.Println("============ Terminou o profile")
+		log.Info("Profile finalizado")
 	}()
 
 	select {
 	case res := <-done:
 		if res.err != nil {
-			fmt.Println("❌ Erro interno no processamento")
-			http.Error(w, "Erro ao processar CSV: "+res.err.Error(), http.StatusInternalServerError)
+			log.Error("Erro ao processar", "error", res.err)
+			http.Error(w, "Erro ao processar: "+res.err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Preparação e envio do json")
+		
+		log.Info("Sucesso (Deprecated)", 
+            "filename", handler.Filename,
+            "duration_ms", "TODO: Medir tempo", 
+        )
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(res.data); err != nil {
+			log.Error("Erro ao gerar JSON", "error", err)
 			http.Error(w, "Erro ao gerar JSON", http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("Terminou o envio do json")
 
 	case <-ctx.Done():
-		fmt.Println("⏱️ Timeout Lógico atingido! Cancelando resposta.")
+		log.Warn("Timeout no processamento", 
+            "filename", handler.Filename, 
+            "timeout_limit", "10m",
+        )
 		http.Error(w, "O processamento demorou demais e foi cancelado.", http.StatusGatewayTimeout)
 		return
 	}

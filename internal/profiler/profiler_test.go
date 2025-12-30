@@ -1,10 +1,13 @@
 package profiler
 
 import (
+	"io"
+	"log/slog"
 	"testing"
 )
 
 func TestProfileAsync(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	t.Run("Caminho Feliz", func(t *testing.T) {
 		inputHeaders := []string{"name", "idade"}
 		inputDataChan := make(chan []string)
@@ -16,7 +19,7 @@ func TestProfileAsync(t *testing.T) {
 			inputDataChan <- []string{"Gustavo", "21"}
 		}()
 
-		got := ProfileAsync(inputHeaders, inputDataChan, inputName)
+		got := ProfileAsync(logger, inputHeaders, inputDataChan, inputName)
 		expected := ProfilerResult{
 			NameFile: "balanco",
 			Columns: []ColumnResult{
@@ -44,6 +47,7 @@ func TestProfileAsync(t *testing.T) {
 }
 
 func TestProfileAsync_Integration(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	t.Run("Deve calcular estatísticas completas via streaming", func(t *testing.T) {
 
 		headers := []string{"Produto", "Preco"}
@@ -59,7 +63,7 @@ func TestProfileAsync_Integration(t *testing.T) {
 			dataChan <- []string{"Cabo", "50.00"}
 		}()
 
-		result := ProfileAsync(headers, dataChan, fileName)
+		result := ProfileAsync(logger, headers, dataChan, fileName)
 
 		if result.TotalMaxRows != 4 {
 			t.Errorf("Esperado 4 linhas, recebeu %d", result.TotalMaxRows)
@@ -94,6 +98,7 @@ func TestProfileAsync_Integration(t *testing.T) {
 }
 
 func TestProfile(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	t.Run("Caminho feliz", func(t *testing.T) {
 		inputColumns := []Column{
 			{
@@ -112,7 +117,7 @@ func TestProfile(t *testing.T) {
 
 		inputName := "balanco.csv"
 
-		got := Profile(inputColumns, inputName)
+		got := Profile(logger, inputColumns, inputName)
 
 		expected := ProfilerResult{
 			NameFile:     "balanco",
@@ -141,7 +146,7 @@ func TestProfile(t *testing.T) {
 
 		inputName := "balanco.csv"
 
-		got := Profile(inputColumns, inputName)
+		got := Profile(logger, inputColumns, inputName)
 
 		expected := ProfilerResult{
 			NameFile:     "balanco",
@@ -157,7 +162,7 @@ func TestProfile(t *testing.T) {
 
 		inputName := ""
 
-		got := Profile(inputColumns, inputName)
+		got := Profile(logger, inputColumns, inputName)
 
 		expected := ProfilerResult{}
 
@@ -180,7 +185,7 @@ func TestProfile(t *testing.T) {
 			},
 		}
 
-		got := Profile(input, "")
+		got := Profile(logger, input, "")
 		if got.Columns == nil {
 			t.Fatal("Esperava analise das colunas, mas veio nil")
 		}

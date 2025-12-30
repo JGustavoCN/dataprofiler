@@ -3,6 +3,7 @@ package infra
 import (
 	"bytes"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 	"testing"
@@ -12,6 +13,7 @@ import (
 )
 
 func TestLoadCSV(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	content := `Nome;Idade;Cidade
 Joao;30;Aracaju
 Maria;25;Lisboa`
@@ -27,7 +29,7 @@ Maria;25;Lisboa`
 	tmpFile.Close()
 	defer os.Remove(tmpName)
 
-	columns, _, err := LoadCSV(tmpName)
+	columns, _, err := LoadCSV(logger, tmpName)
 	if err != nil {
 		t.Fatalf("Erro inesperado ao ler CSV: %v", err)
 	}
@@ -53,6 +55,7 @@ Maria;25;Lisboa`
 }
 
 func TestParseData(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	content := `Nome;Idade;Cidade
 Joao;30;Aracaju
 Olá, João! © 2024;25;Lisboa`
@@ -60,7 +63,7 @@ Olá, João! © 2024;25;Lisboa`
 
 	win1252Bytes := toWindows1252(content)
 	reader := bytes.NewReader(win1252Bytes)
-	columns, err := ParseData(reader)
+	columns, err := ParseData(logger, reader)
 
 	if err != nil {
 		t.Fatalf("Erro inesperado ao ler CSV: %v", err)
@@ -95,10 +98,11 @@ Olá, João! © 2024;25;Lisboa`
 
 
 func TestParseDataAsync(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	csvContent := "nome;idade\nOlá, João! © 2024;30"
 	win1252Bytes := toWindows1252(csvContent)
 	reader := bytes.NewReader(win1252Bytes)
-	headers, dataChan, err := ParseDataAsync(reader)
+	headers, dataChan, err := ParseDataAsync(logger, reader)
 
 	if err != nil {
 		t.Fatalf("Erro inesperado: %v", err)
@@ -131,11 +135,12 @@ func toWindows1252(s string) []byte {
 }
 
 func TestSmartReader(t *testing.T){
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	t.Run("Deve detectar e ler UTF-8 corretamente", func(t *testing.T) {
 		input := "Olá, João! © 2024"
 		reader := bytes.NewBuffer([]byte(input))
 		
-		smartReader, err := NewSmartReader(reader)
+		smartReader, err := NewSmartReader(logger, reader)
 		if err != nil {
 			t.Fatalf("Erro ao criar smart reader: %v", err)
 		}
@@ -153,7 +158,7 @@ func TestSmartReader(t *testing.T){
 		win1252Bytes := toWindows1252(input)
 		reader := bytes.NewReader(win1252Bytes)
 
-		smartReader, err := NewSmartReader(reader)
+		smartReader, err := NewSmartReader(logger, reader)
 		if err != nil {
 			t.Fatalf("Erro ao criar smart reader: %v", err)
 		}
@@ -166,6 +171,8 @@ func TestSmartReader(t *testing.T){
 }
 
 func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
+
 	testCases := []struct {
 		name      string
 		content   string
@@ -197,7 +204,7 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.content)
 			
-			headers, _, err := ParseDataAsync(reader)
+			headers, _, err := ParseDataAsync(logger, reader)
 			
 			if err != nil {
 				t.Fatalf("Erro inesperado: %v", err)
@@ -212,6 +219,7 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 }
 
 func TestParseData_ShouldDetectSeparators(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	testCases := []struct {
 		name      string
 		content   string
@@ -243,7 +251,7 @@ func TestParseData_ShouldDetectSeparators(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.content)
 			
-			headers, err := ParseData(reader)
+			headers, err := ParseData(logger, reader)
 			
 			if err != nil {
 				t.Fatalf("Erro inesperado: %v", err)

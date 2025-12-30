@@ -1,7 +1,8 @@
 package profiler
 
 import (
-	"fmt"
+	"io"
+	"log/slog"
 	"strings"
 )
 
@@ -12,26 +13,40 @@ type ProfilerResult struct {
 	Columns      []ColumnResult
 }
 
-func Profile(columns []Column, fileName string) (columnResult ProfilerResult) {
+func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResult ProfilerResult) {
+	if logger == nil { 
+		logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) 
+	}
 	setResultMetadata(columns, &columnResult, fileName)
 
 	if len(columns) == 0 {
+		logger.Warn("Profile chamado com colunas vazias", "filename", fileName)
 		return
 	}
 
+	logger.Info("Iniciando análise estatística (Síncrona)", 
+		"total_columns", len(columns),
+		"filename", fileName,
+	)
+
 	for i, col := range columns {
 		columnResult.Columns = append(columnResult.Columns, AnalyzeColumn(col))
-		fmt.Printf("------ %d Coluna Analisada\n", (i + 1))
+		logger.Debug("Coluna analisada", 
+			"index", i+1, 
+			"column_name", col.Name, 
+			"rows", len(col.Values),
+		)
 		columnCount := len(col.Values)
 		if columnCount > columnResult.TotalMaxRows {
 			columnResult.TotalMaxRows = columnCount
 		}
 	}
-	fmt.Println("===== Retorno do Profile")
+	logger.Info("Análise estatística concluída", "total_columns_analyzed", len(columnResult.Columns))
 	return
 }
 
-func ProfileAsync(headers []string, dataChan <-chan []string, fileName string) (profilerResult ProfilerResult) {
+func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []string, fileName string) (profilerResult ProfilerResult) {
+	if logger == nil { logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) }
 	setResultMetadata(headers, &profilerResult, fileName)
 
 	accumulators := make([]*ColumnAccumulator,profilerResult.TotalColumns)
@@ -48,15 +63,22 @@ func ProfileAsync(headers []string, dataChan <-chan []string, fileName string) (
 				accumulators[i].Add(value)
 			}
 		}
+		if rowCount % 200000 == 0 {
+			logger.Info("Processamento em andamento", "rows_processed", rowCount)
+		}
 	}
 
 	columnResults := make([]ColumnResult, len(headers))
 	for i, acc := range accumulators{
 		columnResults[i] = acc.Result()
-		fmt.Printf("---- ✅ Coluna %d lida com sucesso!\n", i+1)
+		logger.Debug("Coluna finalizada", "index", i+1, "column", headers[i])
 	}
 
-	fmt.Printf("✅ Processamento Async concluído: %d linhas processadas.\n", rowCount)
+	logger.Info("Processamento Async concluído", 
+		"total_rows", rowCount,
+		"total_columns", len(headers),
+		"filename", fileName,
+	)
 	profilerResult.TotalMaxRows = rowCount
 	profilerResult.Columns = columnResults
 	return 
