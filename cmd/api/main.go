@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
@@ -18,6 +19,13 @@ func main() {
 
 	slog.SetDefault(logger)
 
+	go func(){
+		slog.Info("🔧 Servidor Debug/Pprof iniciado", "addr", "localhost:6060")
+		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+			slog.Error("Falha no servidor Pprof", "error", err)
+		}
+	}()
+
 	slog.Info(
 		"Iniciando servidor DataProfiler", 
         "port", 8080, 
@@ -27,8 +35,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/uploadDeprecated", uploadHandlerDeprecated)
-	mux.HandleFunc("/api/upload", uploadHandlerStreaming)
+	mux.HandleFunc("/api/upload", uploadHandlerDeprecated)
+	mux.HandleFunc("/api/uploadS", uploadHandlerStreaming)
 	handlerComCORS := CORSMiddleware(mux)
 
 	srv := &http.Server{
