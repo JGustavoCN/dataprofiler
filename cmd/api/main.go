@@ -35,8 +35,8 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/api/upload", uploadHandlerDeprecated)
-	mux.HandleFunc("/api/uploadS", uploadHandlerStreaming)
+	mux.HandleFunc("/api/uploadDeprecated", uploadHandlerDeprecated)
+	mux.HandleFunc("/api/upload", uploadHandlerStreaming)
 	handlerComCORS := CORSMiddleware(mux)
 
 	srv := &http.Server{
@@ -55,8 +55,8 @@ func main() {
 }
 
 func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
-
-	requestID := time.Now().UnixNano()
+	start := time.Now()
+	requestID := start.UnixNano()
 
 	log := slog.With(
 		"req_id", requestID,
@@ -115,9 +115,11 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 
 	select {
 	case res := <-done:
+		duration := time.Since(start)
 		log.Info("Sucesso", 
             "filename", handler.Filename,
-            "duration_ms", "TODO: Medir tempo",
+            "duration_ms", duration.Milliseconds(),
+			"duration_human", duration.String(),
         )
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -129,6 +131,7 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 		log.Warn("Timeout no processamento", 
             "filename", handler.Filename, 
             "timeout_limit", "10m",
+			"duration_elapsed", time.Since(start).String(),
         )
 		http.Error(w, "Timeout no processamento", http.StatusGatewayTimeout)
 		return
@@ -136,8 +139,8 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
-
-	requestID := time.Now().UnixNano()
+	start := time.Now()
+	requestID := start.UnixNano()
 
 	log := slog.With(
 		"req_id", requestID,
@@ -206,10 +209,14 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		
+		duration := time.Since(start)
+
 		log.Info("Sucesso (Deprecated)", 
-            "filename", handler.Filename,
-            "duration_ms", "TODO: Medir tempo", 
-        )
+			"filename", handler.Filename,
+			"duration_ms", duration.Milliseconds(),
+			"duration_human", duration.String(),
+		)
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(res.data); err != nil {
@@ -222,6 +229,7 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 		log.Warn("Timeout no processamento", 
             "filename", handler.Filename, 
             "timeout_limit", "10m",
+			"duration_elapsed", time.Since(start).String(),
         )
 		http.Error(w, "O processamento demorou demais e foi cancelado.", http.StatusGatewayTimeout)
 		return
