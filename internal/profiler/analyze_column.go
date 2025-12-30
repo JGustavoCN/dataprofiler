@@ -47,11 +47,22 @@ func AnalyzeColumn(column Column) (result ColumnResult) {
 		filledCount++
 
 	}
-	counts := 0
+
+	priority := map[string]int{
+		"int":    3,
+		"float":  2,
+		"bool":   1,
+		"string": 0,
+	}
+	maxCount := 0
 	for k, v := range typeCounts {
-		if v > counts {
+		if v > maxCount {
 			result.MainType = k
-			counts = v
+			maxCount = v
+		} else if v == maxCount {
+			if priority[k] > priority[result.MainType] {
+				result.MainType = k
+			}
 		}
 	}
 

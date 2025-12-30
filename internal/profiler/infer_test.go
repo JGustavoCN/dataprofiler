@@ -30,3 +30,15 @@ func TestInferType(t *testing.T) {
 	}
 
 }
+
+func FuzzInferType(f *testing.F) {
+	f.Add("123")
+	f.Add("12.50")
+	f.Add("true")
+	f.Add("2025-01-01")
+	f.Add("Texto Comum")
+	f.Add("") 
+	f.Fuzz(func(t *testing.T, input string) {
+		_ = InferType(input)
+	})
+}

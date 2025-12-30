@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"io"
@@ -12,6 +13,19 @@ import (
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
+
+
+func FuzzDetectSeparator(f *testing.F) {
+	f.Add("col1,col2\nval1,val2")
+	f.Add("col1;col2;col3")
+	f.Add("apenas um texto sem separador")
+	f.Add("") 
+
+	f.Fuzz(func(t *testing.T, input string) {
+		reader := strings.NewReader(input)
+		_, _ = DetectSeparator( bufio.NewReader( reader))
+	})
+}
 
 func TestLoadCSV(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
