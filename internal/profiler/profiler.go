@@ -6,11 +6,23 @@ import (
 	"strings"
 )
 
+type StreamData struct {
+	Row        []string
+	LineNumber int
+	Err        error
+}
+type DirtyLine struct {
+	Line   int    `json:"line"`
+	Reason string `json:"reason"`
+}
+
 type ProfilerResult struct {
-	NameFile     string
-	TotalMaxRows int
-	TotalColumns int
-	Columns      []ColumnResult
+	NameFile        string
+	TotalMaxRows    int
+	TotalColumns    int
+	Columns         []ColumnResult
+	DirtyLines      []DirtyLine `json:"dirty_lines"`
+	DirtyLinesCount int         `json:"dirty_lines_count"`
 }
 
 func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResult ProfilerResult) {
@@ -45,20 +57,31 @@ func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResu
 	return
 }
 
-func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []string, fileName string) (profilerResult ProfilerResult) {
+func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan StreamData, fileName string) (profilerResult ProfilerResult) {
 	if logger == nil {
 		logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 	}
 	setResultMetadata(headers, &profilerResult, fileName)
 
 	accumulators := make([]*ColumnAccumulator, profilerResult.TotalColumns)
-
 	for i, name := range headers {
 		accumulators[i] = NewColumnAccumulator(name)
 	}
 
 	rowCount := 0
-	for record := range dataChan {
+	dirtyLines := []DirtyLine{}
+	for msg := range dataChan {
+
+		if msg.Err != nil {
+			if len(dirtyLines) < 1000 {
+				dirtyLines = append(dirtyLines, DirtyLine{
+					Line:   msg.LineNumber,
+					Reason: msg.Err.Error(),
+				})
+			}
+			continue
+		}
+		record := msg.Row
 		rowCount++
 		for i, value := range record {
 			if i < len(accumulators) {
@@ -83,7 +106,10 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []strin
 		"total_rows", rowCount,
 		"total_columns", len(headers),
 		"filename", fileName,
+		"dirty_lines", len(dirtyLines),
 	)
+	profilerResult.DirtyLines = dirtyLines
+	profilerResult.DirtyLinesCount = len(dirtyLines)
 	profilerResult.TotalMaxRows = rowCount
 	profilerResult.Columns = columnResults
 	return

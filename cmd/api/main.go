@@ -123,40 +123,20 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erro ao ler", http.StatusInternalServerError)
 		return
 	}
-	type processingResult struct {
-		data interface{}
-	}
-	done := make(chan processingResult)
 
-	go func() {
-		log.Info("Iniciando profile async em background...")
-		res := profiler.ProfileAsync(log, headers, dataChan, handler.Filename)
-		done <- processingResult{data: res}
-		close(done)
-	}()
+	result := profiler.ProfileAsync(log, headers, dataChan, handler.Filename)
 
-	select {
-	case res := <-done:
-		duration := time.Since(start)
-		log.Info("Sucesso",
-			"filename", handler.Filename,
-			"duration_ms", duration.Milliseconds(),
-			"duration_human", duration.String(),
-		)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(res.data); err != nil {
-			log.Error("Erro ao codificar JSON de resposta", "error", err)
-		}
+	duration := time.Since(start)
+	log.Info("Sucesso",
+		"filename", handler.Filename,
+		"duration_ms", duration.Milliseconds(),
+		"duration_human", duration.String(),
+	)
 
-	case <-ctx.Done():
-		log.Warn("Timeout no processamento",
-			"filename", handler.Filename,
-			"timeout_limit", "10m",
-			"duration_elapsed", time.Since(start).String(),
-		)
-		http.Error(w, "Timeout no processamento", http.StatusGatewayTimeout)
-		return
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(result); err != nil {
+		log.Error("Erro ao codificar JSON de resposta", "error", err)
 	}
 }
 

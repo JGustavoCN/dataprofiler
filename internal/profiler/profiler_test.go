@@ -1,6 +1,7 @@
 package profiler
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 	"testing"
@@ -8,15 +9,15 @@ import (
 
 func TestProfileAsync(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
-	t.Run("Caminho Feliz", func(t *testing.T) {
+	t.Run("Caminho Feliz - Dados Válidos", func(t *testing.T) {
 		inputHeaders := []string{"name", "idade"}
-		inputDataChan := make(chan []string)
+		inputDataChan := make(chan StreamData)
 		inputName := "balanco.csv"
 
 		go func() {
 			defer close(inputDataChan)
-			inputDataChan <- []string{"Joao", "10"}
-			inputDataChan <- []string{"Gustavo", "21"}
+			inputDataChan <- StreamData{Row: []string{"Joao", "10"}}
+			inputDataChan <- StreamData{Row: []string{"Gustavo", "21"}}
 		}()
 
 		got := ProfileAsync(logger, inputHeaders, inputDataChan, inputName)
@@ -42,7 +43,45 @@ func TestProfileAsync(t *testing.T) {
 			if got.Columns[1].Name != expected.Columns[1].Name {
 				t.Errorf("Erro no nome do cabeçalho: esperado [%s] - recebido [%s]", expected.Columns[0].Name, got.Columns[0].Name)
 			}
+
 		})
+		if got.TotalMaxRows != 2 {
+			t.Errorf("Esperava 2 linhas processadas, obteve %d", got.TotalMaxRows)
+		}
+		if got.DirtyLinesCount != 0 {
+			t.Errorf("Não esperava DirtyLines, obteve %d", got.DirtyLinesCount)
+		}
+	})
+	t.Run("Deve registrar Dirty Lines e continuar processando", func(t *testing.T) {
+		headers := []string{"nome", "email"}
+		dataChan := make(chan StreamData)
+		fileName := "sujo.csv"
+
+		go func() {
+			defer close(dataChan)
+			dataChan <- StreamData{Row: []string{"Ana", "ana@teste.com"}, LineNumber: 2}
+			dataChan <- StreamData{Err: errors.New("record on line 3: wrong number of fields"), LineNumber: 3}
+			dataChan <- StreamData{Row: []string{"Bia", "bia@teste.com"}, LineNumber: 4}
+		}()
+
+		result := ProfileAsync(logger, headers, dataChan, fileName)
+		if result.TotalMaxRows != 2 {
+			t.Errorf("Deveria ter processado apenas as 2 linhas válidas, contou %d", result.TotalMaxRows)
+		}
+
+		if result.DirtyLinesCount != 1 {
+			t.Errorf("Deveria ter encontrado 1 DirtyLine, encontrou %d", result.DirtyLinesCount)
+		}
+
+		if len(result.DirtyLines) > 0 {
+			dirty := result.DirtyLines[0]
+			if dirty.Line != 3 {
+				t.Errorf("A linha do erro deveria ser 3, foi %d", dirty.Line)
+			}
+			if dirty.Reason == "" {
+				t.Error("O motivo do erro (Reason) não foi preenchido")
+			}
+		}
 	})
 }
 
@@ -53,14 +92,14 @@ func TestProfileAsync_Integration(t *testing.T) {
 		headers := []string{"Produto", "Preco"}
 		fileName := "vendas.csv"
 
-		dataChan := make(chan []string)
+		dataChan := make(chan StreamData)
 
 		go func() {
 			defer close(dataChan)
-			dataChan <- []string{"TV", "1000.00"}
-			dataChan <- []string{"Radio", "200.00"}
-			dataChan <- []string{"Celular", "1800.00"}
-			dataChan <- []string{"Cabo", "50.00"}
+			dataChan <- StreamData{Row: []string{"TV", "1000.00"}}
+			dataChan <- StreamData{Row: []string{"Radio", "200.00"}}
+			dataChan <- StreamData{Row: []string{"Celular", "1800.00"}}
+			dataChan <- StreamData{Row: []string{"Cabo", "50.00"}}
 		}()
 
 		result := ProfileAsync(logger, headers, dataChan, fileName)

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JGustavoCN/dataprofiler/internal/profiler"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
 )
@@ -128,15 +129,68 @@ func TestParseDataAsync(t *testing.T) {
 	if !ok {
 		t.Fatal("Canal fechou antes de entregar os dados")
 	}
-	if row1[1] != "30" {
-		t.Errorf("Esperado dado '30', recebido '%s'", row1[1])
+	if row1.Row[1] != "30" {
+		t.Errorf("Esperado dado '30', recebido '%s'", row1.Row[1])
 	}
 
 	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
-		if row1[0] != "Olá, João! © 2024" {
-			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", row1[0])
+		if row1.Row[0] != "Olá, João! © 2024" {
+			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", row1.Row[0])
 		}
 	})
+}
+
+func TestParseDataAsync_DirtyLines(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
+	csvContent := `nome;idade
+Joao;30
+Maria;25;Lisboa
+Pedro;40`
+
+	reader := strings.NewReader(csvContent)
+	headers, dataChan, err := ParseDataAsync(context.Background(), logger, reader)
+
+	if err != nil {
+		t.Fatalf("Erro ao iniciar parser: %v", err)
+	}
+
+	if len(headers) != 2 {
+		t.Fatalf("Esperava 2 headers, achou %d", len(headers))
+	}
+
+	var results []profiler.StreamData
+	for item := range dataChan {
+		results = append(results, item)
+	}
+
+	if len(results) != 3 {
+		t.Fatalf("Esperava 3 itens no canal, recebeu %d", len(results))
+	}
+
+	if results[0].Err != nil {
+		t.Errorf("Linha 1 não deveria ter erro")
+	}
+	if results[0].Row[0] != "Joao" {
+		t.Errorf("Linha 1 deveria ser Joao")
+	}
+
+	if results[1].Err == nil {
+		t.Errorf("Linha 2 deveria ser um erro (colunas extras), mas veio nil")
+	} else {
+		if !strings.Contains(results[1].Err.Error(), "wrong number of fields") {
+			t.Logf("Aviso: mensagem de erro diferente do esperado: %v", results[1].Err)
+		}
+	}
+	if results[1].Row != nil {
+		t.Errorf("Linha 2 com erro não deveria ter Row preenchido")
+	}
+
+	if results[2].Err != nil {
+		t.Errorf("Linha 3 não deveria ter erro, o parser deveria se recuperar")
+	}
+	if results[2].Row[0] != "Pedro" {
+		t.Errorf("Linha 3 deveria ser Pedro")
+	}
 }
 
 func toWindows1252(s string) []byte {
@@ -179,6 +233,74 @@ func TestSmartReader(t *testing.T) {
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", input, got)
 		}
 	})
+}
+
+func TestSniffer(t *testing.T) {
+	csvContent := "nome,idade\nJoao,30"
+	readerCSV := bufio.NewReader(strings.NewReader(csvContent))
+	isJSON, _ := sniffJSON(readerCSV)
+	if isJSON {
+		t.Error("Detectou CSV como JSON incorretamente")
+	}
+
+	jsonContent := `{"nome": "Joao", "idade": 30}`
+	readerJSON := bufio.NewReader(strings.NewReader(jsonContent))
+	isJSON, _ = sniffJSON(readerJSON)
+	if !isJSON {
+		t.Error("Falhou ao detectar JSONL válido")
+	}
+
+	jsonSpace := `   
+      {"nome": "Maria"}`
+	readerSpace := bufio.NewReader(strings.NewReader(jsonSpace))
+	isJSON, _ = sniffJSON(readerSpace)
+	if !isJSON {
+		t.Error("Falhou ao detectar JSONL com espaços iniciais")
+	}
+}
+
+func TestParseDataAsync_JSONL(t *testing.T) {
+	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
+
+	jsonContent := `{"time":"2023-01-01", "level":"INFO", "msg":"Teste 1"}
+{"msg":"Teste 2", "level":"WARN", "time":"2023-01-02"}
+{"msg":"Teste 3", "level":"ERROR", "time":"2023-01-03", "extra":"ignorado"}
+`
+
+	reader := strings.NewReader(jsonContent)
+
+	headers, dataChan, err := ParseDataAsync(context.Background(), logger, reader)
+
+	if err != nil {
+		t.Fatalf("Erro ao iniciar parser: %v", err)
+	}
+
+	expectedHeaders := []string{"level", "msg", "time"}
+	if len(headers) != 3 {
+		t.Fatalf("Esperava 3 headers, recebeu %d: %v", len(headers), headers)
+	}
+	for i, h := range headers {
+		if h != expectedHeaders[i] {
+			t.Errorf("Header na posição %d incorreto. Esperado %s, veio %s", i, expectedHeaders[i], h)
+		}
+	}
+
+	var rows []profiler.StreamData
+	for row := range dataChan {
+		rows = append(rows, row)
+	}
+
+	if len(rows) != 3 {
+		t.Errorf("Esperava 3 linhas de dados, recebeu %d", len(rows))
+	}
+
+	row2 := rows[1].Row
+	if row2[0] != "WARN" { // level
+		t.Errorf("Mapeamento incorreto. Coluna 0 (level) deveria ser WARN, foi %s", row2[0])
+	}
+	if row2[1] != "Teste 2" { // msg
+		t.Errorf("Mapeamento incorreto. Coluna 1 (msg) deveria ser Teste 2, foi %s", row2[1])
+	}
 }
 
 func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {

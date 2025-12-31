@@ -20,3 +20,16 @@ yarn-error.log*
 
 # Profiling output
 *.out
+
+# Ignorar arquivos de log
+*.log
+*.jsonl
+
+# Ignorar arquivos de teste de carga/caos
+*.csv
+!produtos_teste.csv
+# (O '!' significa: "Ignore todos os CSVs, EXCETO estes dois que são de exemplo fixo")
+
+# Ignorar binários compilados (se houver)
+main.exe
+dataprofiler.exe
