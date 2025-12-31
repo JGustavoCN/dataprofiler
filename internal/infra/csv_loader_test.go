@@ -14,16 +14,15 @@ import (
 	"golang.org/x/text/transform"
 )
 
-
 func FuzzDetectSeparator(f *testing.F) {
 	f.Add("col1,col2\nval1,val2")
 	f.Add("col1;col2;col3")
 	f.Add("apenas um texto sem separador")
-	f.Add("") 
+	f.Add("")
 
 	f.Fuzz(func(t *testing.T, input string) {
 		reader := strings.NewReader(input)
-		_, _ = DetectSeparator( bufio.NewReader( reader))
+		_, _ = DetectSeparator(bufio.NewReader(reader))
 	})
 }
 
@@ -75,7 +74,6 @@ func TestParseData(t *testing.T) {
 Joao;30;Aracaju
 Olá, João! © 2024;25;Lisboa`
 
-
 	win1252Bytes := toWindows1252(content)
 	reader := bytes.NewReader(win1252Bytes)
 	columns, err := ParseData(logger, reader)
@@ -107,10 +105,9 @@ Olá, João! © 2024;25;Lisboa`
 		got := columns[0]
 		if got.Values[1] != "Olá, João! © 2024" {
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", got.Values[1])
-		}	
+		}
 	})
 }
-
 
 func TestParseDataAsync(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
@@ -136,12 +133,11 @@ func TestParseDataAsync(t *testing.T) {
 	}
 
 	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
-		if  row1[0] != "Olá, João! © 2024" {
+		if row1[0] != "Olá, João! © 2024" {
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", row1[0])
-		}	
+		}
 	})
 }
-
 
 func toWindows1252(s string) []byte {
 	encoder := charmap.Windows1252.NewEncoder()
@@ -149,17 +145,17 @@ func toWindows1252(s string) []byte {
 	return b
 }
 
-func TestSmartReader(t *testing.T){
+func TestSmartReader(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	t.Run("Deve detectar e ler UTF-8 corretamente", func(t *testing.T) {
 		input := "Olá, João! © 2024"
 		reader := bytes.NewBuffer([]byte(input))
-		
+
 		smartReader, err := NewSmartReader(logger, reader)
 		if err != nil {
 			t.Fatalf("Erro ao criar smart reader: %v", err)
 		}
-		
+
 		content, _ := io.ReadAll(smartReader)
 		got := string(content)
 
@@ -181,7 +177,7 @@ func TestSmartReader(t *testing.T){
 		got := string(content)
 		if got != input {
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", input, got)
-		}	
+		}
 	})
 }
 
@@ -189,9 +185,9 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 
 	testCases := []struct {
-		name      string
-		content   string
-		expected  int 
+		name     string
+		content  string
+		expected int
 	}{
 		{
 			name:     "Separado por Ponto e Vírgula (Padrão Excel BR)",
@@ -218,15 +214,15 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.content)
-			
+
 			headers, _, err := ParseDataAsync(context.Background(), logger, reader)
-			
+
 			if err != nil {
 				t.Fatalf("Erro inesperado: %v", err)
 			}
 
 			if len(headers) != tc.expected {
-				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v", 
+				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v",
 					tc.expected, len(headers), headers)
 			}
 		})
@@ -236,9 +232,9 @@ func TestParseDataAsync_ShouldDetectSeparators(t *testing.T) {
 func TestParseData_ShouldDetectSeparators(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	testCases := []struct {
-		name      string
-		content   string
-		expected  int 
+		name     string
+		content  string
+		expected int
 	}{
 		{
 			name:     "Separado por Ponto e Vírgula (Padrão Excel BR)",
@@ -265,15 +261,15 @@ func TestParseData_ShouldDetectSeparators(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			reader := strings.NewReader(tc.content)
-			
+
 			headers, err := ParseData(logger, reader)
-			
+
 			if err != nil {
 				t.Fatalf("Erro inesperado: %v", err)
 			}
 
 			if len(headers) != tc.expected {
-				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v", 
+				t.Errorf("Falha na detecção. Esperado %d colunas, mas detectou %d. Headers: %v",
 					tc.expected, len(headers), headers)
 			}
 		})

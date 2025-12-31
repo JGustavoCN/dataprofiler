@@ -22,7 +22,7 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	go func(){
+	go func() {
 		slog.Info("🔧 Servidor Debug/Pprof iniciado", "addr", "localhost:6060")
 		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
 			slog.Error("Falha no servidor Pprof", "error", err)
@@ -30,10 +30,10 @@ func main() {
 	}()
 
 	slog.Info(
-		"Iniciando servidor DataProfiler", 
-        "port", 8080, 
-        "env", "production",
-        "version", "v1.0.0",
+		"Iniciando servidor DataProfiler",
+		"port", 8080,
+		"env", "production",
+		"version", "v1.0.0",
 	)
 
 	mux := http.NewServeMux()
@@ -50,7 +50,7 @@ func main() {
 		IdleTimeout:  600 * time.Second,
 	}
 
-	go func (){
+	go func() {
 		slog.Info("Servidor pronto e escutando", "addr", ":8080")
 
 		if err := srv.ListenAndServe(); err != nil {
@@ -113,11 +113,11 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	log.Info("Iniciando processamento de arquivo",
-        "filename", handler.Filename,
-        "size_bytes", handler.Size,
-    )
+		"filename", handler.Filename,
+		"size_bytes", handler.Size,
+	)
 	headers, dataChan, err := infra.ParseDataAsync(ctx, log, file)
-	
+
 	if err != nil {
 		log.Error("Erro crítico no parser", "error", err)
 		http.Error(w, "Erro ao ler", http.StatusInternalServerError)
@@ -138,11 +138,11 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	select {
 	case res := <-done:
 		duration := time.Since(start)
-		log.Info("Sucesso", 
-            "filename", handler.Filename,
-            "duration_ms", duration.Milliseconds(),
+		log.Info("Sucesso",
+			"filename", handler.Filename,
+			"duration_ms", duration.Milliseconds(),
 			"duration_human", duration.String(),
-        )
+		)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(res.data); err != nil {
@@ -150,11 +150,11 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case <-ctx.Done():
-		log.Warn("Timeout no processamento", 
-            "filename", handler.Filename, 
-            "timeout_limit", "10m",
+		log.Warn("Timeout no processamento",
+			"filename", handler.Filename,
+			"timeout_limit", "10m",
 			"duration_elapsed", time.Since(start).String(),
-        )
+		)
 		http.Error(w, "Timeout no processamento", http.StatusGatewayTimeout)
 		return
 	}
@@ -197,9 +197,9 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	log.Info("Iniciando processamento de arquivo",
-        "filename", handler.Filename,
-        "size_bytes", handler.Size,
-    )
+		"filename", handler.Filename,
+		"size_bytes", handler.Size,
+	)
 
 	type processingResult struct {
 		data interface{}
@@ -230,10 +230,10 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Erro ao processar: "+res.err.Error(), http.StatusInternalServerError)
 			return
 		}
-		
+
 		duration := time.Since(start)
 
-		log.Info("Sucesso (Deprecated)", 
+		log.Info("Sucesso (Deprecated)",
 			"filename", handler.Filename,
 			"duration_ms", duration.Milliseconds(),
 			"duration_human", duration.String(),
@@ -248,11 +248,11 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case <-ctx.Done():
-		log.Warn("Timeout no processamento", 
-            "filename", handler.Filename, 
-            "timeout_limit", "10m",
+		log.Warn("Timeout no processamento",
+			"filename", handler.Filename,
+			"timeout_limit", "10m",
 			"duration_elapsed", time.Since(start).String(),
-        )
+		)
 		http.Error(w, "O processamento demorou demais e foi cancelado.", http.StatusGatewayTimeout)
 		return
 	}

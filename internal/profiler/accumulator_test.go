@@ -61,7 +61,7 @@ func TestAccumulator(t *testing.T) {
 
 		acc.Add("-10.5")
 		acc.Add("-5.0")
-		acc.Add("-20") 
+		acc.Add("-20")
 
 		result := acc.Result()
 
@@ -69,7 +69,7 @@ func TestAccumulator(t *testing.T) {
 			"Min":     "-20.00",
 			"Max":     "-5.00",
 			"Sum":     "-35.50",
-			"Average": "-11.83", 
+			"Average": "-11.83",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -82,7 +82,7 @@ func TestAccumulator(t *testing.T) {
 
 		result := acc.Result()
 
-		if len(result.Stats) > 2 { 
+		if len(result.Stats) > 2 {
 			if _, ok := result.Stats["Average"]; ok {
 				t.Errorf("Não deveria ter calculado Average para texto!")
 			}

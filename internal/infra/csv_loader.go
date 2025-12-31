@@ -31,8 +31,8 @@ func LoadCSV(logger *slog.Logger, filePath string) ([]profiler.Column, string, e
 }
 
 func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
-	if logger == nil { 
-		logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) 
+	if logger == nil {
+		logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 	}
 	smartReader, err := NewSmartReader(logger, file)
 	if err != nil {
@@ -40,7 +40,7 @@ func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
 	}
 
 	bufferedSmartReader := bufio.NewReader(smartReader)
-	
+
 	separator, err := DetectSeparator(bufferedSmartReader)
 	if err != nil {
 		separator = ';'
@@ -63,7 +63,7 @@ func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
 
 	headers := records[0]
 
-	logger.Info("Estrutura carregada", 
+	logger.Info("Estrutura carregada",
 		"total_rows", len(records),
 		"columns_count", len(headers),
 		"headers", headers,
@@ -88,8 +88,8 @@ func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
 }
 
 func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]string, <-chan []string, error) {
-	if logger == nil { 
-		logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) 
+	if logger == nil {
+		logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 	}
 	out := make(chan []string, 100)
 
@@ -112,15 +112,15 @@ func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]st
 	reader.Comma = separator
 	reader.LazyQuotes = true
 	reader.ReuseRecord = true
-	
+
 	headers, err := reader.Read()
 	if err != nil {
-		close(out)           
-		return nil, nil, err 
+		close(out)
+		return nil, nil, err
 	}
-	
-	logger.Info("Início do streaming", 
-		"columns_count", len(headers), 
+
+	logger.Info("Início do streaming",
+		"columns_count", len(headers),
 		"headers", headers,
 	)
 
@@ -139,9 +139,9 @@ func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]st
 					goto EndProcessing
 				}
 				if err != nil {
-					logger.Warn("Erro ao ler linha CSV", 
-							"line_attempt", count + errorCount,
-							"error", err,
+					logger.Warn("Erro ao ler linha CSV",
+						"line_attempt", count+errorCount,
+						"error", err,
 					)
 					errorCount++
 					continue
@@ -152,22 +152,22 @@ func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]st
 
 				out <- rowCopy
 				count++
-			
+
 			}
 		}
-		EndProcessing: logger.Info("Streaming finalizado", 
-				"total_rows_read", count-1,
-				"total_errors", errorCount,
-			)
+	EndProcessing:
+		logger.Info("Streaming finalizado",
+			"total_rows_read", count-1,
+			"total_errors", errorCount,
+		)
 	}()
 
 	return headers, out, nil
 }
 
-
 func NewSmartReader(logger *slog.Logger, r io.Reader) (io.Reader, error) {
 	br := bufio.NewReader(r)
-	bytesTosample , err := br.Peek(1024)
+	bytesTosample, err := br.Peek(1024)
 	if err != nil && err != io.EOF {
 		return nil, err
 	}
@@ -175,19 +175,17 @@ func NewSmartReader(logger *slog.Logger, r io.Reader) (io.Reader, error) {
 	if utf8.Valid(bytesTosample) {
 		logger.Debug("Encoding detectado: UTF-8")
 		return br, nil
-	}	
+	}
 	logger.Warn("Encoding UTF-8 inválido detectado. Convertendo Windows1252 -> UTF-8")
 	decoderReader := transform.NewReader(br, charmap.Windows1252.NewDecoder())
 	return decoderReader, nil
 }
 
-
-
 func DetectSeparator(r *bufio.Reader) (rune, error) {
-	
-	bytesToPeek, err := r.Peek(2048) 
+
+	bytesToPeek, err := r.Peek(2048)
 	if err != nil && err != io.EOF {
-		return ';', err 
+		return ';', err
 	}
 
 	semicolonCount := 0 // ;

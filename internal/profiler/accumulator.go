@@ -92,6 +92,6 @@ func (acc *ColumnAccumulator) Result() (result ColumnResult) {
 		TypeCounts:  acc.TypeCounts,
 		Filled:      (float64(acc.CountFilled) / float64(acc.TotalCount)),
 		BlankRatio:  (float64(acc.BlankCount) / float64(acc.TotalCount)),
-		Stats: stats,
+		Stats:       stats,
 	}
 }

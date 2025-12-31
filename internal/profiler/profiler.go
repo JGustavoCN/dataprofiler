@@ -14,8 +14,8 @@ type ProfilerResult struct {
 }
 
 func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResult ProfilerResult) {
-	if logger == nil { 
-		logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) 
+	if logger == nil {
+		logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 	}
 	setResultMetadata(columns, &columnResult, fileName)
 
@@ -24,16 +24,16 @@ func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResu
 		return
 	}
 
-	logger.Info("Iniciando análise estatística (Síncrona)", 
+	logger.Info("Iniciando análise estatística (Síncrona)",
 		"total_columns", len(columns),
 		"filename", fileName,
 	)
 
 	for i, col := range columns {
 		columnResult.Columns = append(columnResult.Columns, AnalyzeColumn(col))
-		logger.Debug("Coluna analisada", 
-			"index", i+1, 
-			"column_name", col.Name, 
+		logger.Debug("Coluna analisada",
+			"index", i+1,
+			"column_name", col.Name,
 			"rows", len(col.Values),
 		)
 		columnCount := len(col.Values)
@@ -46,10 +46,12 @@ func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResu
 }
 
 func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []string, fileName string) (profilerResult ProfilerResult) {
-	if logger == nil { logger = slog.New(slog.NewJSONHandler(io.Discard, nil)) }
+	if logger == nil {
+		logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
+	}
 	setResultMetadata(headers, &profilerResult, fileName)
 
-	accumulators := make([]*ColumnAccumulator,profilerResult.TotalColumns)
+	accumulators := make([]*ColumnAccumulator, profilerResult.TotalColumns)
 
 	for i, name := range headers {
 		accumulators[i] = NewColumnAccumulator(name)
@@ -66,25 +68,25 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan []strin
 
 		PutRowSlice(record)
 
-		if rowCount % 200000 == 0 {
+		if rowCount%200000 == 0 {
 			logger.Info("Processamento em andamento", "rows_processed", rowCount)
 		}
 	}
 
 	columnResults := make([]ColumnResult, len(headers))
-	for i, acc := range accumulators{
+	for i, acc := range accumulators {
 		columnResults[i] = acc.Result()
 		logger.Debug("Coluna finalizada", "index", i+1, "column", headers[i])
 	}
 
-	logger.Info("Processamento Async concluído", 
+	logger.Info("Processamento Async concluído",
 		"total_rows", rowCount,
 		"total_columns", len(headers),
 		"filename", fileName,
 	)
 	profilerResult.TotalMaxRows = rowCount
 	profilerResult.Columns = columnResults
-	return 
+	return
 }
 
 func setResultMetadata[T string | Column](columns []T, profilerResult *ProfilerResult, fileName string) {
