@@ -1,26 +1,36 @@
 package profiler
 
 import (
+	"fmt"
+	"math/rand/v2"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ColumnAccumulator struct {
-	Name         string
-	TotalCount   int
-	BlankCount   int
-	CountFilled  int
-	TypeCounts   map[DataType]int
-	numericMin   *float64
-	numericMax   *float64
-	numericSum   float64
-	numericCount int
+	Name          string
+	TotalCount    int
+	BlankCount    int
+	CountFilled   int
+	TypeCounts    map[DataType]int
+	numericMin    *float64
+	numericMax    *float64
+	numericSum    float64
+	numericCount  int
+	numericSample []float64
+	sampleSize    int
+	rng           *rand.Rand
 }
 
 func NewColumnAccumulator(name string) *ColumnAccumulator {
+	seed := uint64(time.Now().UnixNano())
 	return &ColumnAccumulator{
-		Name:       name,
-		TypeCounts: make(map[DataType]int),
+		Name:          name,
+		TypeCounts:    make(map[DataType]int),
+		numericSample: make([]float64, 0, 1000),
+		sampleSize:    1000,
+		rng:           rand.New(rand.NewPCG(seed, seed+1)),
 	}
 }
 
@@ -61,21 +71,31 @@ func (acc *ColumnAccumulator) updateNumericStats(val float64) {
 		v := val
 		acc.numericMax = &v
 	}
+
+	if len(acc.numericSample) < acc.sampleSize {
+		acc.numericSample = append(acc.numericSample, val)
+	} else {
+		randomIndex := acc.rng.IntN(acc.numericCount)
+		if randomIndex < acc.sampleSize {
+			acc.numericSample[randomIndex] = val
+		}
+	}
 }
 
 func (acc *ColumnAccumulator) Result() ColumnResult {
 	mainType := acc.determineMainType()
 	sensitivity, reasonSensitivity := ClassifySensitivity(mainType)
-	stats := make(map[string]string)
-
+	stats := make(map[StatKey]string)
+	var histogram map[string]int
 	if mainType == TypeInteger || mainType == TypeFloat {
 		if acc.numericCount > 0 && acc.numericMin != nil && acc.numericMax != nil {
-			stats["Min"] = strconv.FormatFloat(*acc.numericMin, 'f', 2, 64)
-			stats["Max"] = strconv.FormatFloat(*acc.numericMax, 'f', 2, 64)
-			stats["Sum"] = strconv.FormatFloat(acc.numericSum, 'f', 2, 64)
+			stats[StatMin] = strconv.FormatFloat(*acc.numericMin, 'f', 2, 64)
+			stats[StatMax] = strconv.FormatFloat(*acc.numericMax, 'f', 2, 64)
+			stats[StatSum] = strconv.FormatFloat(acc.numericSum, 'f', 2, 64)
 
 			avg := acc.numericSum / float64(acc.numericCount)
-			stats["Average"] = strconv.FormatFloat(avg, 'f', 2, 64)
+			stats[StatAverage] = strconv.FormatFloat(avg, 'f', 2, 64)
+			histogram = calculateHistogram(acc.numericSample)
 		}
 	}
 
@@ -106,6 +126,7 @@ func (acc *ColumnAccumulator) Result() ColumnResult {
 		SlaReason:         reasonSLA,
 		ConsistencyRatio:  consistencyRatio,
 		Stats:             stats,
+		Histogram:         histogram,
 	}
 }
 
@@ -141,4 +162,44 @@ func (acc *ColumnAccumulator) determineMainType() DataType {
 	}
 
 	return winner
+}
+
+func calculateHistogram(values []float64) map[string]int {
+	if len(values) == 0 {
+		return nil
+	}
+
+	minVal, maxVal := values[0], values[0]
+	for _, v := range values {
+		if v < minVal {
+			minVal = v
+		}
+		if v > maxVal {
+			maxVal = v
+		}
+	}
+
+	numBuckets := 10
+	rangeVal := maxVal - minVal
+
+	if rangeVal == 0 {
+		return map[string]int{fmt.Sprintf("%.2f", minVal): len(values)}
+	}
+
+	step := rangeVal / float64(numBuckets)
+	histogram := make(map[string]int)
+
+	for _, v := range values {
+		bucketIndex := int((v - minVal) / step)
+		if bucketIndex >= numBuckets {
+			bucketIndex = numBuckets - 1
+		}
+
+		bucketStart := minVal + (float64(bucketIndex) * step)
+		bucketEnd := bucketStart + step
+		label := fmt.Sprintf("%.2f-%.2f", bucketStart, bucketEnd)
+
+		histogram[label]++
+	}
+	return histogram
 }

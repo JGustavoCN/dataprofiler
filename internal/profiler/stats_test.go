@@ -7,11 +7,11 @@ func TestStatsCalc(t *testing.T) {
 		input := []float64{10.0, 20.0, 30.0}
 		got := StatsCalc(input)
 
-		expected := map[string]string{
-			"Min":     "10.00",
-			"Max":     "30.00",
-			"Sum":     "60.00",
-			"Average": "20.00",
+		expected := map[StatKey]string{
+			StatMin:     "10.00",
+			StatMax:     "30.00",
+			StatSum:     "60.00",
+			StatAverage: "20.00",
 		}
 
 		checkStats(t, got, expected)
@@ -21,18 +21,18 @@ func TestStatsCalc(t *testing.T) {
 		input := []float64{-10.0, -5.0, -20.0}
 		got := StatsCalc(input)
 
-		expected := map[string]string{
-			"Min":     "-20.00",
-			"Max":     "-5.00",
-			"Sum":     "-35.00",
-			"Average": "-11.67",
+		expected := map[StatKey]string{
+			StatMin:     "-20.00",
+			StatMax:     "-5.00",
+			StatSum:     "-35.00",
+			StatAverage: "-11.67",
 		}
 
 		checkStats(t, got, expected)
 	})
 }
 
-func checkStats(t *testing.T, got, expected map[string]string) {
+func checkStats(t *testing.T, got, expected map[StatKey]string) {
 	for k, v := range expected {
 		if got[k] != v {
 			t.Errorf("Para chave %s: recebeu %s, esperava %s", k, got[k], v)

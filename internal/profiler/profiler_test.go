@@ -115,13 +115,13 @@ func TestProfileAsync_Integration(t *testing.T) {
 		}
 
 		colProduto := result.Columns[0]
-		// Nota: Assumindo que TypeString é uma constante definida no pacote
+
 		if colProduto.MainType != TypeString {
 			t.Errorf("Coluna Produto deveria ser STRING, foi %s", colProduto.MainType)
 		}
 
 		colPreco := result.Columns[1]
-		// Nota: Assumindo que TypeFloat/TypeInteger são constantes
+
 		if colPreco.MainType != TypeFloat && colPreco.MainType != TypeInteger {
 			t.Errorf("Coluna Preco deveria ser numérica (FLOAT/INT), foi %s", colPreco.MainType)
 		}
@@ -131,12 +131,20 @@ func TestProfileAsync_Integration(t *testing.T) {
 			t.Fatal("Stats da coluna Preco não deveria ser nil")
 		}
 
-		if stats["Sum"] != "3050.00" {
-			t.Errorf("Soma incorreta. Esperado 3050.00, recebeu %s", stats["Sum"])
+		if stats[StatSum] != "3050.00" {
+			t.Errorf("Soma incorreta. Esperado 3050.00, recebeu %s", stats[StatSum])
 		}
 
-		if stats["Average"] != "762.50" {
-			t.Errorf("Média incorreta. Esperado 762.50, recebeu %s", stats["Average"])
+		if stats[StatAverage] != "762.50" {
+			t.Errorf("Média incorreta. Esperado 762.50, recebeu %s", stats[StatAverage])
+		}
+		if len(result.SampleRows) != 4 {
+			t.Errorf("Esperava 4 linhas de amostra (total do arquivo < 50), recebeu %d", len(result.SampleRows))
+		}
+
+		// Verifica se copiou os dados corretamente (Deep Check)
+		if result.SampleRows[0][0] != "TV" {
+			t.Errorf("Amostra corrompida ou fora de ordem. Esperava 'TV', recebeu '%s'", result.SampleRows[0][0])
 		}
 	})
 }
@@ -164,12 +172,11 @@ func TestProfile(t *testing.T) {
 		checkProfiler(t, got, expected)
 	})
 
-	// --- TESTE RESTAURADO DO CÓDIGO 2 ---
 	t.Run("Colunas com tamanhos diferentes", func(t *testing.T) {
 		inputColumns := []Column{
 			{Name: "Animais", Values: []string{"cachorro", "  gato  "}},
 			{Name: "Idades", Values: []string{"1", "2"}},
-			// Esta coluna tem mais valores que as outras
+
 			{Name: "Dono", Values: []string{"Joao", "  Alfreado  ", "Lucas ", " Gustavo"}},
 		}
 
@@ -179,21 +186,19 @@ func TestProfile(t *testing.T) {
 
 		expected := ProfilerResult{
 			NameFile:     "balanco",
-			TotalMaxRows: 4, // Deve considerar o tamanho da maior coluna
+			TotalMaxRows: 4,
 			TotalColumns: 3,
 		}
 
 		checkProfiler(t, got, expected)
 	})
 
-	// --- TESTE RESTAURADO DO CÓDIGO 2 ---
 	t.Run("Colunas vazias", func(t *testing.T) {
 		inputColumns := []Column{}
 		inputName := ""
 
 		got := Profile(logger, inputColumns, inputName)
 
-		// Espera struct zero/vazia
 		expected := ProfilerResult{}
 
 		checkProfiler(t, got, expected)
@@ -216,6 +221,30 @@ func TestProfile(t *testing.T) {
 
 		if got.Columns[1].MainType != TypeInteger {
 			t.Errorf("Integração falhou: Esperava no tipo principal INTEGER, recebeu %s", got.Columns[1].MainType)
+		}
+	})
+
+	t.Run("Deve gerar Histograma Exato para Coluna Numérica (Modo Síncrono)", func(t *testing.T) {
+
+		values := []string{"10", "20", "30", "40", "50"}
+		input := Column{
+			Name:   "Produtos",
+			Values: values,
+		}
+
+		got := AnalyzeColumn(input)
+
+		if got.Histogram == nil {
+			t.Fatal("Histograma não foi gerado para coluna numérica")
+		}
+
+		totalCounts := 0
+		for _, v := range got.Histogram {
+			totalCounts += v
+		}
+
+		if totalCounts != 5 {
+			t.Errorf("Histograma perdeu dados. Esperava total 5, contou %d", totalCounts)
 		}
 	})
 }

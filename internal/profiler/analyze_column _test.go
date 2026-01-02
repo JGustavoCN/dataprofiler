@@ -260,8 +260,8 @@ func TestAnalyze(t *testing.T) {
 			t.Fatal("Esperava estatísticas para coluna numérica, mas veio nil")
 		}
 
-		if got.Stats["Average"] != "20.00" {
-			t.Errorf("Integração falhou: Esperava Average 20.00, recebeu %s", got.Stats["Average"])
+		if got.Stats[StatAverage] != "20.00" {
+			t.Errorf("Integração falhou: Esperava Average 20.00, recebeu %s", got.Stats[StatAverage])
 		}
 	})
 

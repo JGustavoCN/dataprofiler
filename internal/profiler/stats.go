@@ -2,7 +2,16 @@ package profiler
 
 import "strconv"
 
-func StatsCalc(v []float64) map[string]string {
+type StatKey string
+
+const (
+	StatMin     StatKey = "min"
+	StatMax     StatKey = "max"
+	StatSum     StatKey = "sum"
+	StatAverage StatKey = "average"
+)
+
+func StatsCalc(v []float64) map[StatKey]string {
 	if len(v) == 0 {
 		return nil
 	}
@@ -22,10 +31,10 @@ func StatsCalc(v []float64) map[string]string {
 
 	avg := sum / float64(len(v))
 
-	return map[string]string{
-		"Min":     strconv.FormatFloat(min, 'f', 2, 64),
-		"Max":     strconv.FormatFloat(max, 'f', 2, 64),
-		"Sum":     strconv.FormatFloat(sum, 'f', 2, 64),
-		"Average": strconv.FormatFloat(avg, 'f', 2, 64),
+	return map[StatKey]string{
+		StatMin:     strconv.FormatFloat(min, 'f', 2, 64),
+		StatMax:     strconv.FormatFloat(max, 'f', 2, 64),
+		StatSum:     strconv.FormatFloat(sum, 'f', 2, 64),
+		StatAverage: strconv.FormatFloat(avg, 'f', 2, 64),
 	}
 }

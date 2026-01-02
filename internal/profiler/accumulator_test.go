@@ -1,6 +1,7 @@
 package profiler
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -46,11 +47,11 @@ func TestAccumulator(t *testing.T) {
 			t.Fatal("Stats não deveria ser nil para colunas numéricas")
 		}
 
-		expectedStats := map[string]string{
-			"Min":     "10.00",
-			"Max":     "30.00",
-			"Sum":     "60.00",
-			"Average": "20.00",
+		expectedStats := map[StatKey]string{
+			StatMin:     "10.00",
+			StatMax:     "30.00",
+			StatSum:     "60.00",
+			StatAverage: "20.00",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -69,11 +70,11 @@ func TestAccumulator(t *testing.T) {
 			t.Errorf("Esperava MainType FLOAT, recebeu %s", result.MainType)
 		}
 
-		expectedStats := map[string]string{
-			"Min":     "-20.00",
-			"Max":     "-5.00",
-			"Sum":     "-35.50",
-			"Average": "-11.83",
+		expectedStats := map[StatKey]string{
+			StatMin:     "-20.00",
+			StatMax:     "-5.00",
+			StatSum:     "-35.50",
+			StatAverage: "-11.83",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -92,9 +93,9 @@ func TestAccumulator(t *testing.T) {
 			t.Errorf("Deveria ter detectado FLOAT mesmo com vírgula, recebeu: %s", result.MainType)
 		}
 
-		expectedStats := map[string]string{
-			"Sum":     "31.00",
-			"Average": "15.50",
+		expectedStats := map[StatKey]string{
+			StatSum:     "31.00",
+			StatAverage: "15.50",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -129,11 +130,11 @@ func TestAccumulator(t *testing.T) {
 			t.Fatal("Stats não deveria ser nil para colunas numéricas")
 		}
 
-		expectedStats := map[string]string{
-			"Min":     "10.00",
-			"Max":     "30.00",
-			"Sum":     "60.00",
-			"Average": "20.00",
+		expectedStats := map[StatKey]string{
+			StatMin:     "10.00",
+			StatMax:     "30.00",
+			StatSum:     "60.00",
+			StatAverage: "20.00",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -152,11 +153,11 @@ func TestAccumulator(t *testing.T) {
 			t.Errorf("Esperava MainType FLOAT, recebeu %s", result.MainType)
 		}
 
-		expectedStats := map[string]string{
-			"Min":     "-20.00",
-			"Max":     "-5.00",
-			"Sum":     "-35.50",
-			"Average": "-11.83",
+		expectedStats := map[StatKey]string{
+			StatMin:     "-20.00",
+			StatMax:     "-5.00",
+			StatSum:     "-35.50",
+			StatAverage: "-11.83",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -174,9 +175,9 @@ func TestAccumulator(t *testing.T) {
 			t.Errorf("Deveria ter detectado FLOAT mesmo com vírgula, recebeu: %s", result.MainType)
 		}
 
-		expectedStats := map[string]string{
-			"Sum":     "31.00",
-			"Average": "15.50",
+		expectedStats := map[StatKey]string{
+			StatSum:     "31.00",
+			StatAverage: "15.50",
 		}
 
 		checkStatsMap(t, result.Stats, expectedStats)
@@ -296,9 +297,37 @@ func TestAccumulator(t *testing.T) {
 			t.Errorf("Falha de Ruído! Inteiro deveria ser PUBLIC, mas foi classificado como %s", resPublic.Sensitivity)
 		}
 	})
+
+	t.Run("Deve limitar Amostra (Reservoir Sampling) e gerar Histograma", func(t *testing.T) {
+		acc := NewColumnAccumulator("Precos")
+
+		for i := 0; i < 2500; i++ {
+
+			acc.Add(strconv.Itoa(i))
+		}
+
+		result := acc.Result()
+
+		if result.Histogram == nil {
+			t.Fatal("Histograma não deveria ser nulo")
+		}
+
+		totalSampled := 0
+		for _, count := range result.Histogram {
+			totalSampled += count
+		}
+
+		if totalSampled != 1000 {
+			t.Errorf("Reservoir Sampling falhou. Esperava 1000 itens na amostra, mas o histograma mostra %d", totalSampled)
+		}
+
+		if result.Stats[StatMax] != "2499.00" {
+			t.Errorf("Estatística max falhou. Esperava 2499.00, veio %s", result.Stats[StatMax])
+		}
+	})
 }
 
-func checkStatsMap(t *testing.T, got, expected map[string]string) {
+func checkStatsMap(t *testing.T, got, expected map[StatKey]string) {
 	t.Helper()
 	for k, v := range expected {
 		if got[k] != v {

@@ -3,7 +3,9 @@ package profiler
 import (
 	"io"
 	"log/slog"
+	"math/rand/v2"
 	"strings"
+	"time"
 )
 
 type StreamData struct {
@@ -17,12 +19,13 @@ type DirtyLine struct {
 }
 
 type ProfilerResult struct {
-	NameFile        string
-	TotalMaxRows    int
-	TotalColumns    int
-	Columns         []ColumnResult
-	DirtyLines      []DirtyLine `json:"dirty_lines"`
-	DirtyLinesCount int         `json:"dirty_lines_count"`
+	NameFile        string         `json:"name_file"`
+	TotalMaxRows    int            `json:"total_max_rows"`
+	TotalColumns    int            `json:"total_columns"`
+	DirtyLinesCount int            `json:"dirty_lines_count"`
+	Columns         []ColumnResult `json:"columns"`
+	SampleRows      [][]string     `json:"sample_rows"`
+	DirtyLines      []DirtyLine    `json:"dirty_lines"`
 }
 
 func Profile(logger *slog.Logger, columns []Column, fileName string) (columnResult ProfilerResult) {
@@ -68,6 +71,15 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan StreamD
 		accumulators[i] = NewColumnAccumulator(name)
 	}
 
+	// --- CONFIGURAÇÃO DO PREVIEW (SAMPLING DE LINHAS) ---
+	const previewSize = 50
+	sampleRows := make([][]string, 0, previewSize)
+
+	// Inicializa o gerador aleatório (Go 1.22+)
+	seed := uint64(time.Now().UnixNano())
+	rng := rand.New(rand.NewPCG(seed, seed+1))
+	// ----------------------------------------------------
+
 	rowCount := 0
 	dirtyLines := []DirtyLine{}
 	for msg := range dataChan {
@@ -83,9 +95,23 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan StreamD
 		}
 		record := msg.Row
 		rowCount++
+
 		for i, value := range record {
 			if i < len(accumulators) {
 				accumulators[i].Add(value)
+			}
+		}
+
+		if len(sampleRows) < previewSize {
+			rowCopy := make([]string, len(record))
+			copy(rowCopy, record)
+			sampleRows = append(sampleRows, rowCopy)
+		} else {
+			k := rng.IntN(rowCount)
+			if k < previewSize {
+				rowCopy := make([]string, len(record))
+				copy(rowCopy, record)
+				sampleRows[k] = rowCopy
 			}
 		}
 
@@ -112,6 +138,7 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan StreamD
 	profilerResult.DirtyLinesCount = len(dirtyLines)
 	profilerResult.TotalMaxRows = rowCount
 	profilerResult.Columns = columnResults
+	profilerResult.SampleRows = sampleRows
 	return
 }
 
