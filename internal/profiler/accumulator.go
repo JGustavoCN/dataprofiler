@@ -6,12 +6,11 @@ import (
 )
 
 type ColumnAccumulator struct {
-	Name        string
-	TotalCount  int
-	BlankCount  int
-	CountFilled int
-	TypeCounts  map[string]int
-
+	Name         string
+	TotalCount   int
+	BlankCount   int
+	CountFilled  int
+	TypeCounts   map[DataType]int
 	numericMin   *float64
 	numericMax   *float64
 	numericSum   float64
@@ -21,24 +20,28 @@ type ColumnAccumulator struct {
 func NewColumnAccumulator(name string) *ColumnAccumulator {
 	return &ColumnAccumulator{
 		Name:       name,
-		TypeCounts: make(map[string]int),
+		TypeCounts: make(map[DataType]int),
 	}
 }
 
 func (acc *ColumnAccumulator) Add(value string) {
 	acc.TotalCount++
+
 	trimmedValue := strings.TrimSpace(value)
 	if trimmedValue == "" {
 		acc.BlankCount++
 		return
 	}
 
-	inferredType := InferType(trimmedValue)
-	acc.TypeCounts[inferredType]++
 	acc.CountFilled++
 
-	if inferredType == "int" || inferredType == "float" {
-		val, err := strconv.ParseFloat(trimmedValue, 64)
+	inferredType := InferType(trimmedValue, acc.Name)
+	acc.TypeCounts[inferredType]++
+
+	if inferredType == TypeInteger || inferredType == TypeFloat {
+		valClean := strings.Replace(trimmedValue, ",", ".", 1)
+
+		val, err := strconv.ParseFloat(valClean, 64)
 		if err == nil {
 			acc.updateNumericStats(val)
 		}
@@ -60,20 +63,12 @@ func (acc *ColumnAccumulator) updateNumericStats(val float64) {
 	}
 }
 
-func (acc *ColumnAccumulator) Result() (result ColumnResult) {
-	winnerType := "string"
-	maxCount := 0
-
-	for typeName, count := range acc.TypeCounts {
-		if count > maxCount {
-			maxCount = count
-			winnerType = typeName
-		}
-	}
+func (acc *ColumnAccumulator) Result() ColumnResult {
+	mainType := acc.determineMainType()
 
 	stats := make(map[string]string)
 
-	if winnerType == "int" || winnerType == "float" {
+	if mainType == TypeInteger || mainType == TypeFloat {
 		if acc.numericCount > 0 && acc.numericMin != nil && acc.numericMax != nil {
 			stats["Min"] = strconv.FormatFloat(*acc.numericMin, 'f', 2, 64)
 			stats["Max"] = strconv.FormatFloat(*acc.numericMax, 'f', 2, 64)
@@ -84,14 +79,54 @@ func (acc *ColumnAccumulator) Result() (result ColumnResult) {
 		}
 	}
 
+	var filledRatio, blankRatio float64
+	if acc.TotalCount > 0 {
+		filledRatio = float64(acc.CountFilled) / float64(acc.TotalCount)
+		blankRatio = float64(acc.BlankCount) / float64(acc.TotalCount)
+	}
+
 	return ColumnResult{
 		Name:        acc.Name,
-		MainType:    winnerType,
+		MainType:    mainType,
 		CountFilled: acc.CountFilled,
 		BlankCount:  acc.BlankCount,
 		TypeCounts:  acc.TypeCounts,
-		Filled:      (float64(acc.CountFilled) / float64(acc.TotalCount)),
-		BlankRatio:  (float64(acc.BlankCount) / float64(acc.TotalCount)),
+		Filled:      filledRatio,
+		BlankRatio:  blankRatio,
 		Stats:       stats,
 	}
+}
+
+func (acc *ColumnAccumulator) determineMainType() DataType {
+	var winner DataType = TypeString
+	maxCount := 0
+
+	priority := map[DataType]int{
+		TypeEmpty:       0,
+		TypeString:      1,
+		TypeBoolean:     2,
+		TypeInteger:     3,
+		TypeFloat:       4,
+		TypeDate:        5,
+		TypeDateCompact: 6,
+		TypeEmail:       7,
+		TypePlaca:       8,
+		TypeCEP:         9,
+		TypeCPF:         10,
+		TypeCNPJ:        11,
+		TypeFiscalKey44: 12,
+	}
+
+	for dtype, count := range acc.TypeCounts {
+		if count > maxCount {
+			maxCount = count
+			winner = dtype
+		} else if count == maxCount {
+			if priority[dtype] > priority[winner] {
+				winner = dtype
+			}
+		}
+	}
+
+	return winner
 }

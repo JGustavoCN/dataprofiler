@@ -73,7 +73,7 @@ func TestParseData(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(io.Discard, nil))
 	content := `Nome;Idade;Cidade
 Joao;30;Aracaju
-Olá, João! © 2024;25;Lisboa`
+Olá, João! © 2024. É muito importante testar acentuação: Avó, Pão, Ações, Frequência.;25;Lisboa`
 
 	win1252Bytes := toWindows1252(content)
 	reader := bytes.NewReader(win1252Bytes)
@@ -104,7 +104,7 @@ Olá, João! © 2024;25;Lisboa`
 
 	t.Run("Deve detectar o Windows-1252 e coverter para utf-8 corretamente", func(t *testing.T) {
 		got := columns[0]
-		if got.Values[1] != "Olá, João! © 2024" {
+		if got.Values[1] != "Olá, João! © 2024. É muito importante testar acentuação: Avó, Pão, Ações, Frequência." {
 			t.Errorf("Falha no Windows1252. O Sniffer não converteu. Esperado: %s, Recebido: %s", "Olá, João! © 2024", got.Values[1])
 		}
 	})

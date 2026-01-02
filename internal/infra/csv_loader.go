@@ -306,35 +306,37 @@ func parseJSONLAsync(ctx context.Context, logger *slog.Logger, reader *bufio.Rea
 }
 
 func NewSmartReader(logger *slog.Logger, r io.Reader) (io.Reader, error) {
-
 	br := bufio.NewReader(r)
 
-	peekBytes, err := br.Peek(4)
-	if err != nil && err != io.EOF && len(peekBytes) < 2 {
-		if err == io.EOF {
-			return br, nil
-		}
-		return nil, err
+	bomCheck, err := br.Peek(4)
+	if err != nil && err != io.EOF && len(bomCheck) < 2 {
+		return br, nil
 	}
 
-	if len(peekBytes) >= 2 && peekBytes[0] == 0xFF && peekBytes[1] == 0xFE {
+	if len(bomCheck) >= 2 && bomCheck[0] == 0xFF && bomCheck[1] == 0xFE {
 		logger.Info("Encoding detectado: UTF-16 LE (Convertendo para UTF-8)")
 		win16le := unicodeenc.UTF16(unicodeenc.LittleEndian, unicodeenc.UseBOM)
-		decoder := win16le.NewDecoder()
-
-		return transform.NewReader(br, decoder), nil
+		return transform.NewReader(br, win16le.NewDecoder()), nil
 	}
-	if len(peekBytes) >= 2 && peekBytes[0] == 0xFE && peekBytes[1] == 0xFF {
+	if len(bomCheck) >= 2 && bomCheck[0] == 0xFE && bomCheck[1] == 0xFF {
 		logger.Info("Encoding detectado: UTF-16 BE (Convertendo para UTF-8)")
 		win16be := unicodeenc.UTF16(unicodeenc.BigEndian, unicodeenc.UseBOM)
 		return transform.NewReader(br, win16be.NewDecoder()), nil
 	}
 
-	if utf8.Valid(peekBytes) {
-		logger.Debug("Encoding detectado: UTF-8")
+	const sampleSize = 2048
+	sample, err := br.Peek(sampleSize)
+
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
+
+	if utf8.Valid(sample) {
+		logger.Debug("Encoding detectado: UTF-8 (Nativo)")
 		return br, nil
 	}
-	logger.Warn("Encoding UTF-8 inválido detectado. Tentando fallback Windows1252 -> UTF-8")
+
+	logger.Warn("Encoding UTF-8 inválido detectado na amostra. Aplicando fallback Windows1252 -> UTF-8")
 	decoderReader := transform.NewReader(br, charmap.Windows1252.NewDecoder())
 	return decoderReader, nil
 }

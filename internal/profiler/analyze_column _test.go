@@ -5,15 +5,15 @@ import "testing"
 func TestAnalyze(t *testing.T) {
 	t.Run("Analise inteiro totalmente prenchidos", func(t *testing.T) {
 		input := Column{
-			"Idades",
-			[]string{"1", "2", "2"},
+			Name:   "Idades",
+			Values: []string{"1", "2", "2"},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Idades",
-			MainType:    "int",
+			MainType:    TypeInteger,
 			BlankCount:  0,
 			CountFilled: 3,
 			Filled:      1,
@@ -25,15 +25,15 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Analise inteiros com não preenchidos e espaços", func(t *testing.T) {
 		input := Column{
-			"Idades",
-			[]string{"1   ", "   5  ", "2 ", "     "},
+			Name:   "Idades",
+			Values: []string{"1   ", "   5  ", "2 ", "     "},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Idades",
-			MainType:    "int",
+			MainType:    TypeInteger,
 			BlankCount:  1,
 			CountFilled: 3,
 			Filled:      0.75,
@@ -45,15 +45,15 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Analise float com não preenchidos e espaços", func(t *testing.T) {
 		input := Column{
-			"Idades",
-			[]string{"1.5", "   5.4  ", "2.0 ", "     "},
+			Name:   "Idades",
+			Values: []string{"1.5", "   5.4  ", "2.0 ", "     "},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Idades",
-			MainType:    "float",
+			MainType:    TypeFloat,
 			BlankCount:  1,
 			CountFilled: 3,
 			Filled:      0.75,
@@ -65,15 +65,15 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Analise palavras com ruido nos dados", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{"cachorro", "  gato  ", "2.0 ", "     "},
+			Name:   "Animais",
+			Values: []string{"cachorro", "  gato  ", "2.0 ", "     "},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Animais",
-			MainType:    "string",
+			MainType:    TypeString,
 			BlankCount:  1,
 			CountFilled: 3,
 			Filled:      0.75,
@@ -85,15 +85,15 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Dados heterogeneos", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{"cachorro", "  2  ", "2.0 ", "     ", "5", "True", "5", "6", "7", "8"},
+			Name:   "Animais",
+			Values: []string{"cachorro", "  2  ", "2.0 ", "     ", "5", "True", "5", "6", "7", "8"},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Animais",
-			MainType:    "int",
+			MainType:    TypeInteger,
 			BlankCount:  1,
 			CountFilled: 9,
 			Filled:      0.9,
@@ -104,41 +104,41 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Contagem de tipos", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{"cachorro", "  2  ", "2.0 ", "     ", "5", "True", "5", "6", "7", "8"},
+			Name:   "Animais",
+			Values: []string{"cachorro", "  2  ", "2.0 ", "     ", "5", "True", "5", "6", "7", "8"},
 		}
 
 		got := AnalyzeColumn(input).TypeCounts
 
-		expected := map[string]int{
-			"string": 1,
-			"bool":   1,
-			"int":    6,
-			"float":  1,
+		expected := map[DataType]int{
+			TypeString:  1,
+			TypeBoolean: 1,
+			TypeInteger: 6,
+			TypeFloat:   1,
 		}
 		checkTypeCounts(t, got, expected)
 	})
 
 	t.Run("Caso completo", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{"cachorro", "  2  ", "2.0 ", "    ", "5", "True", "5", "6", "7", "8"},
+			Name:   "Animais",
+			Values: []string{"cachorro", "  2  ", "2.0 ", "    ", "5", "True", "5", "6", "7", "8"},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Animais",
-			MainType:    "int",
+			MainType:    TypeInteger,
 			BlankCount:  1,
 			CountFilled: 9,
 			Filled:      0.9,
 			BlankRatio:  0.1,
-			TypeCounts: map[string]int{
-				"string": 1,
-				"bool":   1,
-				"int":    6,
-				"float":  1,
+			TypeCounts: map[DataType]int{
+				TypeString:  1,
+				TypeBoolean: 1,
+				TypeInteger: 6,
+				TypeFloat:   1,
 			},
 		}
 		checkAnalyse(t, got, expected)
@@ -147,24 +147,24 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Caso metade int e metade string, mantém o primeiro tipo que apareceu", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{"2", "  w ", "2.0 ", "    ", "5", "True", "jkjn", "kjnk", "7", ""},
+			Name:   "Animais",
+			Values: []string{"2", "  w ", "2.0 ", "    ", "5", "True", "jkjn", "kjnk", "7", ""},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
 			Name:        "Animais",
-			MainType:    "int",
+			MainType:    TypeInteger,
 			BlankCount:  2,
 			CountFilled: 8,
 			Filled:      0.8,
 			BlankRatio:  0.2,
-			TypeCounts: map[string]int{
-				"string": 3,
-				"bool":   1,
-				"int":    3,
-				"float":  1,
+			TypeCounts: map[DataType]int{
+				TypeString:  3,
+				TypeBoolean: 1,
+				TypeInteger: 3,
+				TypeFloat:   1,
 			},
 		}
 		checkAnalyse(t, got, expected)
@@ -173,30 +173,32 @@ func TestAnalyze(t *testing.T) {
 
 	t.Run("Caso da coluna vazia", func(t *testing.T) {
 		input := Column{
-			"Animais",
-			[]string{},
-		}
-
-		got := AnalyzeColumn(input)
-
-		expected := ColumnResult{}
-		checkAnalyse(t, got, expected)
-		checkTypeCounts(t, got.TypeCounts, expected.TypeCounts)
-	})
-
-	t.Run("Caso da maioria vazia", func(t *testing.T) {
-		input := Column{
-			"Animais",
-			[]string{"cachorro", "  2  ", "2.0 ", "     ", "5", "    ", " ", "", "", "8"},
+			Name:   "Animais",
+			Values: []string{},
 		}
 
 		got := AnalyzeColumn(input)
 
 		expected := ColumnResult{
-			TypeCounts: map[string]int{
-				"string": 1,
-				"int":    3,
-				"float":  1,
+			Name:     "Animais",
+			MainType: TypeEmpty,
+		}
+		checkAnalyse(t, got, expected)
+	})
+
+	t.Run("Caso da maioria vazia", func(t *testing.T) {
+		input := Column{
+			Name:   "Animais",
+			Values: []string{"cachorro", "  2  ", "2.0 ", "     ", "5", "    ", " ", "", "", "8"},
+		}
+
+		got := AnalyzeColumn(input)
+
+		expected := ColumnResult{
+			TypeCounts: map[DataType]int{
+				TypeString:  1,
+				TypeInteger: 3,
+				TypeFloat:   1,
 			},
 		}
 		checkTypeCounts(t, got.TypeCounts, expected.TypeCounts)
@@ -230,10 +232,10 @@ func TestAnalyze(t *testing.T) {
 			t.Errorf("Não deveria ter calculado estatísticas para texto!")
 		}
 	})
-
 }
 
 func checkAnalyse(t *testing.T, got, expected ColumnResult) {
+	t.Helper()
 	t.Run("Nome correto", func(t *testing.T) {
 		if got.Name != expected.Name {
 			t.Errorf("Nome errado [esperado: %s - recebeu: %s]", expected.Name, got.Name)
@@ -244,29 +246,24 @@ func checkAnalyse(t *testing.T, got, expected ColumnResult) {
 			t.Errorf("Tipo correto [esperado: %s - recebeu: %s]", expected.MainType, got.MainType)
 		}
 	})
-	t.Run("Contagem de vazios", func(t *testing.T) {
-		if got.Filled != expected.Filled {
-			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.Filled, got.Filled)
-		}
-	})
-
-	t.Run("Valores de preenchimento correto", func(t *testing.T) {
+	t.Run("Valores de preenchimento", func(t *testing.T) {
 		if got.CountFilled != expected.CountFilled {
-			t.Errorf("Contagem de preenchimento [esperado: %d - recebeu: %d]", expected.CountFilled, got.CountFilled)
+			t.Errorf("CountFilled [esperado: %d - recebeu: %d]", expected.CountFilled, got.CountFilled)
 		}
 		if got.BlankCount != expected.BlankCount {
-			t.Errorf("Contagem de vazios [esperado: %d - recebeu: %d]", expected.BlankCount, got.BlankCount)
+			t.Errorf("BlankCount [esperado: %d - recebeu: %d]", expected.BlankCount, got.BlankCount)
 		}
 		if got.Filled != expected.Filled {
-			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.Filled, got.Filled)
+			t.Errorf("Filled [esperado: %f - recebeu: %f]", expected.Filled, got.Filled)
 		}
 		if got.BlankRatio != expected.BlankRatio {
-			t.Errorf("Valor de preenchimento correto [esperado: %f - recebeu: %f]", expected.BlankRatio, got.BlankRatio)
+			t.Errorf("BlankRatio [esperado: %f - recebeu: %f]", expected.BlankRatio, got.BlankRatio)
 		}
 	})
 }
 
-func checkTypeCounts(t *testing.T, got, expected map[string]int) {
+func checkTypeCounts(t *testing.T, got, expected map[DataType]int) {
+	t.Helper()
 	t.Run("Contagem de tipos", func(t *testing.T) {
 		for k, v := range expected {
 			if got[k] != v {

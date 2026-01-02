@@ -17,7 +17,7 @@ function FileUploader({ loading, handleUpload, file, setFile }) {
       <input
         id="fileUpload"
         type="file"
-        accept=".csv"
+        accept=".csv,.jsonl"
         onChange={handleFileChange}
         className="file-hidden"
       />
@@ -34,7 +34,7 @@ function FileUploader({ loading, handleUpload, file, setFile }) {
       >
         {loading ? (
           <div className="container-generic">
-            <Spinner/>
+            <Spinner />
             Analisar Arquivo
           </div>
         ) : (
