@@ -3,6 +3,51 @@ package profiler
 import "testing"
 
 func TestAnalyze(t *testing.T) {
+
+	t.Run("Analise inteiros com não preenchidos (Validando SLA)", func(t *testing.T) {
+		input := Column{
+			Name:   "Idades",
+			Values: []string{"1", "5", "2", ""},
+		}
+
+		got := AnalyzeColumn(input)
+
+		if got.SLA != SlaCritical {
+			t.Errorf("Esperava SLA CRITICAL para 25%% de vazio em Integer, recebeu %s", got.SLA)
+		}
+		if got.ConsistencyRatio != 1.0 {
+			t.Errorf("Esperava consistência 1.0 (todos são int), recebeu %f", got.ConsistencyRatio)
+		}
+	})
+
+	t.Run("Dados heterogeneos (Teste de Consistência)", func(t *testing.T) {
+
+		input := Column{
+			Name:   "NumerosMisturados",
+			Values: []string{"1", "2", "2.5", "texto", "5", "True", "5", "6", "7", ""},
+		}
+
+		got := AnalyzeColumn(input)
+
+		expectedConsistency := 6.0 / 9.0
+
+		if got.MainType != TypeInteger {
+			t.Errorf("Esperava MainType INTEGER, veio %s", got.MainType)
+		}
+
+		if got.ConsistencyRatio != expectedConsistency {
+			t.Errorf("Consistência errada. Esperava %f, veio %f", expectedConsistency, got.ConsistencyRatio)
+		}
+
+		if got.SLA != SlaCritical {
+			t.Errorf("Esperava SLA CRITICAL por baixa consistência, recebeu %s", got.SLA)
+		}
+
+		if got.SlaReason == "" {
+			t.Error("SlaReason não deveria vir vazio")
+		}
+	})
+
 	t.Run("Analise inteiro totalmente prenchidos", func(t *testing.T) {
 		input := Column{
 			Name:   "Idades",

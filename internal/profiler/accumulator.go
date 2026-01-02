@@ -85,15 +85,25 @@ func (acc *ColumnAccumulator) Result() ColumnResult {
 		blankRatio = float64(acc.BlankCount) / float64(acc.TotalCount)
 	}
 
+	consistencyRatio := 1.0
+	if acc.CountFilled > 0 {
+		winnerCount := acc.TypeCounts[mainType]
+		consistencyRatio = float64(winnerCount) / float64(acc.CountFilled)
+	}
+
+	sla, reason := CalculateSLA(blankRatio, consistencyRatio, mainType)
 	return ColumnResult{
-		Name:        acc.Name,
-		MainType:    mainType,
-		CountFilled: acc.CountFilled,
-		BlankCount:  acc.BlankCount,
-		TypeCounts:  acc.TypeCounts,
-		Filled:      filledRatio,
-		BlankRatio:  blankRatio,
-		Stats:       stats,
+		Name:             acc.Name,
+		MainType:         mainType,
+		CountFilled:      acc.CountFilled,
+		BlankCount:       acc.BlankCount,
+		TypeCounts:       acc.TypeCounts,
+		Filled:           filledRatio,
+		BlankRatio:       blankRatio,
+		SLA:              sla,
+		SlaReason:        reason,
+		ConsistencyRatio: consistencyRatio,
+		Stats:            stats,
 	}
 }
 

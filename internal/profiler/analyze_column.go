@@ -11,14 +11,17 @@ type Column struct {
 }
 
 type ColumnResult struct {
-	Name        string
-	MainType    DataType
-	BlankCount  int
-	CountFilled int
-	Filled      float64
-	BlankRatio  float64
-	TypeCounts  map[DataType]int
-	Stats       map[string]string
+	Name             string            `json:"name"`
+	MainType         DataType          `json:"main_type"`
+	BlankCount       int               `json:"blank_count"`
+	CountFilled      int               `json:"count_filled"`
+	Filled           float64           `json:"filled_ratio"`
+	BlankRatio       float64           `json:"blank_ratio"`
+	SLA              QualityScore      `json:"sla"`
+	SlaReason        string            `json:"sla_reason"`
+	ConsistencyRatio float64           `json:"consistency_ratio"`
+	TypeCounts       map[DataType]int  `json:"type_counts"`
+	Stats            map[string]string `json:"stats,omitempty"`
 }
 
 func AnalyzeColumn(column Column) (result ColumnResult) {
@@ -70,6 +73,17 @@ func AnalyzeColumn(column Column) (result ColumnResult) {
 	if total > 0 {
 		result.Filled = float64(filledCount) / total
 		result.BlankRatio = float64(blankCount) / total
+
+		result.ConsistencyRatio = 1.0
+		if filledCount > 0 {
+			winnerCount := result.TypeCounts[result.MainType]
+			result.ConsistencyRatio = float64(winnerCount) / float64(filledCount)
+		}
+		result.SLA, result.SlaReason = CalculateSLA(result.BlankRatio, result.ConsistencyRatio, result.MainType)
+
+	} else {
+		result.SLA = SlaGood
+		result.ConsistencyRatio = 1.0
 	}
 
 	return result
