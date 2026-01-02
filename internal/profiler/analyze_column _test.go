@@ -307,6 +307,18 @@ func checkAnalyse(t *testing.T, got, expected ColumnResult) {
 	})
 }
 
+func TestSensitivityClassification(t *testing.T) {
+	col := Column{
+		Name:   "Documentos",
+		Values: []string{"123.456.789-00", "111.222.333-44"},
+	}
+	result := AnalyzeColumn(col)
+
+	if result.Sensitivity != SensitivityConfidential {
+		t.Errorf("Esperado CONFIDENTIAL para CPF, recebeu %s", result.Sensitivity)
+	}
+}
+
 func checkTypeCounts(t *testing.T, got, expected map[DataType]int) {
 	t.Helper()
 	t.Run("Contagem de tipos", func(t *testing.T) {

@@ -11,17 +11,19 @@ type Column struct {
 }
 
 type ColumnResult struct {
-	Name             string            `json:"name"`
-	MainType         DataType          `json:"main_type"`
-	BlankCount       int               `json:"blank_count"`
-	CountFilled      int               `json:"count_filled"`
-	Filled           float64           `json:"filled_ratio"`
-	BlankRatio       float64           `json:"blank_ratio"`
-	SLA              QualityScore      `json:"sla"`
-	SlaReason        string            `json:"sla_reason"`
-	ConsistencyRatio float64           `json:"consistency_ratio"`
-	TypeCounts       map[DataType]int  `json:"type_counts"`
-	Stats            map[string]string `json:"stats,omitempty"`
+	Name              string            `json:"name"`
+	MainType          DataType          `json:"main_type"`
+	Sensitivity       DataSensitivity   `json:"sensitivity_level"`
+	SensitivityReason string            `json:"sensitivity_reason"`
+	SLA               QualityScore      `json:"sla"`
+	SlaReason         string            `json:"sla_reason"`
+	BlankCount        int               `json:"blank_count"`
+	CountFilled       int               `json:"count_filled"`
+	Filled            float64           `json:"filled_ratio"`
+	BlankRatio        float64           `json:"blank_ratio"`
+	ConsistencyRatio  float64           `json:"consistency_ratio"`
+	TypeCounts        map[DataType]int  `json:"type_counts"`
+	Stats             map[string]string `json:"stats,omitempty"`
 }
 
 func AnalyzeColumn(column Column) (result ColumnResult) {
@@ -59,6 +61,7 @@ func AnalyzeColumn(column Column) (result ColumnResult) {
 	}
 
 	result.MainType = determineMainType(result.TypeCounts)
+	result.Sensitivity, result.SensitivityReason = ClassifySensitivity(result.MainType)
 
 	if result.MainType == TypeInteger || result.MainType == TypeFloat {
 

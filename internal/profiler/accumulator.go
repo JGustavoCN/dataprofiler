@@ -65,7 +65,7 @@ func (acc *ColumnAccumulator) updateNumericStats(val float64) {
 
 func (acc *ColumnAccumulator) Result() ColumnResult {
 	mainType := acc.determineMainType()
-
+	sensitivity, reasonSensitivity := ClassifySensitivity(mainType)
 	stats := make(map[string]string)
 
 	if mainType == TypeInteger || mainType == TypeFloat {
@@ -91,19 +91,21 @@ func (acc *ColumnAccumulator) Result() ColumnResult {
 		consistencyRatio = float64(winnerCount) / float64(acc.CountFilled)
 	}
 
-	sla, reason := CalculateSLA(blankRatio, consistencyRatio, mainType)
+	sla, reasonSLA := CalculateSLA(blankRatio, consistencyRatio, mainType)
 	return ColumnResult{
-		Name:             acc.Name,
-		MainType:         mainType,
-		CountFilled:      acc.CountFilled,
-		BlankCount:       acc.BlankCount,
-		TypeCounts:       acc.TypeCounts,
-		Filled:           filledRatio,
-		BlankRatio:       blankRatio,
-		SLA:              sla,
-		SlaReason:        reason,
-		ConsistencyRatio: consistencyRatio,
-		Stats:            stats,
+		Name:              acc.Name,
+		MainType:          mainType,
+		Sensitivity:       sensitivity,
+		SensitivityReason: reasonSensitivity,
+		CountFilled:       acc.CountFilled,
+		BlankCount:        acc.BlankCount,
+		TypeCounts:        acc.TypeCounts,
+		Filled:            filledRatio,
+		BlankRatio:        blankRatio,
+		SLA:               sla,
+		SlaReason:         reasonSLA,
+		ConsistencyRatio:  consistencyRatio,
+		Stats:             stats,
 	}
 }
 

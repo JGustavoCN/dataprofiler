@@ -9,8 +9,8 @@ import (
 
 var (
 	// Essenciais
-	RegexFiscalKey = regexp.MustCompile(`^\d{44}$`)                        // NFe, CTe, MDFe
-	RegexPlaca     = regexp.MustCompile(`^[A-Z]{3}[0-9][0-9A-Z][0-9]{2}$`) // ABC1234 ou ABC1C34
+	RegexFiscalKey = regexp.MustCompile(`^\d{44}$`)                          // NFe, CTe, MDFe
+	RegexPlaca     = regexp.MustCompile(`^[A-Z]{3}-?[0-9][0-9A-Z][0-9]{2}$`) // ABC1234 ou ABC1C34
 
 	// Documentos Brasileiros
 	RegexCPF  = regexp.MustCompile(`^\d{3}\.\d{3}\.\d{3}-\d{2}$`)       // 000.000.000-00

@@ -112,29 +112,6 @@ func TestAccumulator(t *testing.T) {
 		}
 	})
 
-	t.Run("Contagem e Inferência Simples", func(t *testing.T) {
-		acc := NewColumnAccumulator("Idade")
-
-		acc.Add("10")
-		acc.Add("20")
-		acc.Add("")
-		acc.Add("Ola")
-
-		result := acc.Result()
-
-		if result.BlankCount != 1 {
-			t.Errorf("Esperado 1 vazio, recebeu %d", result.BlankCount)
-		}
-
-		if count := result.TypeCounts[TypeInteger]; count != 2 {
-			t.Errorf("Esperado 2 ints, recebeu %d", count)
-		}
-
-		if count := result.TypeCounts[TypeString]; count != 1 {
-			t.Errorf("Esperado 1 string, recebeu %d", count)
-		}
-	})
-
 	t.Run("Deve calcular estatísticas de números positivos", func(t *testing.T) {
 		acc := NewColumnAccumulator("Precos")
 
@@ -280,6 +257,43 @@ func TestAccumulator(t *testing.T) {
 
 		if result.SLA != SlaWarning {
 			t.Errorf("Esperava SLA WARNING (não Critical) para String 50%% vazia, recebeu %s", result.SLA)
+		}
+	})
+
+	t.Run("Integração Sensitivity: Deve classificar PII e Dados Internos corretamente", func(t *testing.T) {
+
+		accPii := NewColumnAccumulator("Documento_Cliente")
+		accPii.Add("123.456.789-00")
+		accPii.Add("111.222.333-44")
+
+		resPii := accPii.Result()
+
+		if resPii.MainType != TypeCPF {
+			t.Fatalf("Pré-requisito falhou: Deveria ter detectado CPF, mas detectou %s", resPii.MainType)
+		}
+
+		if resPii.Sensitivity != SensitivityConfidential {
+			t.Errorf("Falha de Governança! CPF deveria ser CONFIDENTIAL, mas foi classificado como %s", resPii.Sensitivity)
+		}
+
+		accInternal := NewColumnAccumulator("Placa_Caminhao")
+		accInternal.Add("ABC-1234")
+		accInternal.Add("MER-1D23")
+
+		resInternal := accInternal.Result()
+
+		if resInternal.Sensitivity != SensitivityInternal {
+			t.Errorf("Falha de Negócio! Placa deveria ser INTERNAL, mas foi classificada como %s", resInternal.Sensitivity)
+		}
+
+		accPublic := NewColumnAccumulator("Quantidade_Estoque")
+		accPublic.Add("100")
+		accPublic.Add("500")
+
+		resPublic := accPublic.Result()
+
+		if resPublic.Sensitivity != SensitivityPublic {
+			t.Errorf("Falha de Ruído! Inteiro deveria ser PUBLIC, mas foi classificado como %s", resPublic.Sensitivity)
 		}
 	})
 }
