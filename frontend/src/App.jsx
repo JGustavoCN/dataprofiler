@@ -253,6 +253,21 @@ function App() {
     <Container maxWidth="lg">
       <Box sx={{ my: 6 }}>
         <Box sx={{ textAlign: "center", mb: 6 }}>
+          <Box
+            component="img"
+            src="/logo.svg"
+            alt="DataProfiler Logo"
+            sx={{
+              height: 120,
+              width: "auto",
+              mb: 2,
+              filter: "drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2))",
+              transition: "transform 0.3s ease-in-out",
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
+            }}
+          />
           <Typography
             variant="h2"
             component="h1"

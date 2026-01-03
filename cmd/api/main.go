@@ -5,14 +5,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
+	"github.com/JGustavoCN/dataprofiler/frontend"
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
 	"github.com/JGustavoCN/dataprofiler/internal/infra/web"
 	"github.com/JGustavoCN/dataprofiler/internal/profiler"
@@ -55,7 +59,21 @@ func main() {
 		WriteTimeout: 5 * time.Minute,
 		IdleTimeout:  600 * time.Second,
 	}
+	go func() {
 
+		time.Sleep(1 * time.Second)
+
+		slog.Info("Abrindo navegador automaticamente...")
+		openBrowser("http://localhost:8080")
+	}()
+	assets, err := frontend.GetFileSystem()
+	if err != nil {
+		log.Fatalf("Falha ao carregar frontend embutido: %v", err)
+	}
+
+	fileServer := http.FileServer(assets)
+
+	mux.Handle("/", spaHandler(assets, fileServer))
 	go func() {
 		slog.Info("Servidor pronto e escutando", "addr", ":8080")
 
@@ -80,6 +98,49 @@ func main() {
 		slog.Info("Servidor desligado com sucesso (Gracefully)")
 	}
 
+}
+
+func openBrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("plataforma não suportada")
+	}
+
+	if err != nil {
+		slog.Error("Não foi possível abrir o navegador automaticamente", "error", err)
+	}
+}
+
+func spaHandler(fsys http.FileSystem, fileServer http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		path := r.URL.Path
+
+		f, err := fsys.Open(path)
+
+		if os.IsNotExist(err) {
+
+			r.URL.Path = "/"
+			fileServer.ServeHTTP(w, r)
+			return
+		} else if err != nil {
+
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		f.Close()
+		fileServer.ServeHTTP(w, r)
+	})
 }
 
 func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request, broker *web.Broker) {

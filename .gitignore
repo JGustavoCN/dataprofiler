@@ -6,6 +6,9 @@
 bin/
 vendor/
 .env
+*.so
+*.dylib
+*.syso
 
 # --- Frontend (Node/React) ---
 node_modules/
@@ -33,3 +36,6 @@ yarn-error.log*
 # Ignorar binários compilados (se houver)
 main.exe
 dataprofiler.exe
+
+*.log
+tmp/
