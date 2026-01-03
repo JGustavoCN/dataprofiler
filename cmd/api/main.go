@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	_ "net/http/pprof"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/JGustavoCN/dataprofiler/internal/infra"
+	"github.com/JGustavoCN/dataprofiler/internal/infra/web"
 	"github.com/JGustavoCN/dataprofiler/internal/profiler"
 )
 
@@ -21,6 +23,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	slog.SetDefault(logger)
+	sseBroker := web.NewBroker()
 
 	go func() {
 		slog.Info("🔧 Servidor Debug/Pprof iniciado", "addr", "localhost:6060")
@@ -37,9 +40,12 @@ func main() {
 	)
 
 	mux := http.NewServeMux()
-
+	mux.Handle("/events", sseBroker)
+	mux.HandleFunc("/api/upload", func(w http.ResponseWriter, r *http.Request) {
+		uploadHandlerStreaming(w, r, sseBroker)
+	})
 	mux.HandleFunc("/api/uploadDeprecated", uploadHandlerDeprecated)
-	mux.HandleFunc("/api/upload", uploadHandlerStreaming)
+
 	handlerComCORS := CORSMiddleware(mux)
 
 	srv := &http.Server{
@@ -76,7 +82,7 @@ func main() {
 
 }
 
-func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
+func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request, broker *web.Broker) {
 	start := time.Now()
 	requestID := start.UnixNano()
 
@@ -112,11 +118,19 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	log.Info("Iniciando processamento de arquivo",
+	onProgress := func(percentage float64, bytesRead int64) {
+		msg := fmt.Sprintf(`{"status": "streaming", "progress": %.1f, "bytes": %d}`, percentage, bytesRead)
+		broker.Broadcast(msg)
+	}
+
+	progressFile := infra.NewProgressReader(file, handler.Size, onProgress)
+
+	log.Info("Iniciando processamento com rastreamento real",
 		"filename", handler.Filename,
 		"size_bytes", handler.Size,
 	)
-	headers, dataChan, err := infra.ParseDataAsync(ctx, log, file)
+
+	headers, dataChan, err := infra.ParseDataAsync(ctx, log, progressFile)
 
 	if err != nil {
 		log.Error("Erro crítico no parser", "error", err)
@@ -125,6 +139,7 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := profiler.ProfileAsync(log, headers, dataChan, handler.Filename)
+	broker.Broadcast(`{"status": "finishing", "progress": 100}`)
 
 	duration := time.Since(start)
 	log.Info("Sucesso",
@@ -138,6 +153,7 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(result); err != nil {
 		log.Error("Erro ao codificar JSON de resposta", "error", err)
 	}
+	broker.Broadcast(`{"status": "done", "progress": 100}`)
 }
 
 func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {

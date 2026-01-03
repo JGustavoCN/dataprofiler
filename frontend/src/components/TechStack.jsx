@@ -1,48 +1,100 @@
+import React from "react";
+import Stack from "@mui/material/Stack";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
+
 import reactLogo from "../assets/react.svg";
 import viteLogo from "../assets/vite.svg";
 import golangLogo from "../assets/golang.svg";
 import swcLogo from "../assets/swc.svg";
-import "./TechStack.css";
-import "../App.css";
 
-function TechStack() {
+const technologies = [
+  {
+    name: "Golang",
+    description: "Backend High-Performance",
+    logo: golangLogo,
+    color: "#00ADD8",
+  },
+  {
+    name: "React",
+    description: "Frontend Library",
+    logo: reactLogo,
+    color: "#61DAFB",
+  },
+  {
+    name: "Vite",
+    description: "Next Gen Bundler",
+    logo: viteLogo,
+    color: "#646CFF",
+  },
+  {
+    name: "SWC",
+    description: "Super-fast Compiler",
+    logo: swcLogo,
+    color: "#FFA500",
+  },
+];
+
+export default function TechStack() {
   return (
-    <div className="apple-subtitle tech-row">
-      <div className="tech-item" title="React">
-        <img
-          src={reactLogo}
-          className="tech-icon icon-react"
-          alt="React Logo"
-        />
-        <span>React</span>
-      </div>
+    <Stack
+      direction="row"
+      spacing={3}
+      justifyContent="center"
+      alignItems="center"
+      flexWrap="wrap"
+      sx={{ my: 4 }}
+    >
+      {technologies.map((tech) => (
+        <Tooltip key={tech.name} title={tech.description} arrow>
+          <Paper
+            elevation={0}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              px: 2,
+              py: 1,
 
-      <span>+</span>
+              borderRadius: "50px",
+              border: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
+              cursor: "default",
+              transition: "all 0.3s ease",
 
-      <div className="tech-item" title="Vite">
-        <img src={viteLogo} className="tech-icon icon-vite" alt="Vite Logo" />
-        <span>Vite</span>
-      </div>
+              "&:hover": {
+                transform: "translateY(-4px)",
+                borderColor: tech.color,
+                boxShadow: `0 4px 20px ${tech.color}40`,
+              },
+            }}
+          >
+            <Box
+              component="img"
+              src={tech.logo}
+              alt={`${tech.name} Logo`}
+              sx={{
+                width: 30,
+                height: 30,
+                transition: "transform 0.3s",
+              }}
+            />
 
-      <span>+</span>
-
-      <div className="tech-item" title="JavaScript">
-        <img
-          src={golangLogo}
-          className="tech-icon icon-golang"
-          alt="Golang Logo"
-        />
-        <span>Golang</span>
-      </div>
-
-      <span>+</span>
-
-      <div className="tech-item" title="SWC">
-        <img src={swcLogo} className="tech-icon icon-swc" alt="SWC Logo" />
-        <span>SWC</span>
-      </div>
-    </div>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 600,
+                color: "text.primary",
+              }}
+            >
+              {tech.name}
+            </Typography>
+          </Paper>
+        </Tooltip>
+      ))}
+    </Stack>
   );
 }
-
-export default TechStack;

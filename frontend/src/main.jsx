@@ -1,19 +1,37 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import "./index.css";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { ErrorBoundary } from "react-error-boundary";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
 import App from "./App.jsx";
 import GlobalErrorFallback from "./components/GlobalErrorFallback";
-import { ErrorBoundary } from "react-error-boundary";
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <ErrorBoundary
-      FallbackComponent={GlobalErrorFallback}
-      onReset={() => {
-        console.log("Aplicação reiniciada pelo usuário");
-      }}
-    >
-      <App />
-    </ErrorBoundary>
-  </StrictMode>
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#1976d2",
+    },
+  },
+});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+
+      <ErrorBoundary
+        FallbackComponent={GlobalErrorFallback}
+        onReset={() => {
+          console.info(
+            "♻️ Aplicação reiniciada pelo usuário via ErrorBoundary"
+          );
+          window.location.reload();
+        }}
+      >
+        <App />
+      </ErrorBoundary>
+    </ThemeProvider>
+  </React.StrictMode>
 );
