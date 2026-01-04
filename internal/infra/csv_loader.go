@@ -27,6 +27,7 @@ func LoadCSV(logger *slog.Logger, filePath string) ([]profiler.Column, string, e
 	}
 	file, err := os.Open(filePath)
 	if err != nil {
+		logger.Error("Falha ao abrir arquivo", "path", filePath, "error", err)
 		return nil, "", err
 	}
 	defer file.Close()

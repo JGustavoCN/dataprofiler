@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"log/slog"
@@ -24,11 +25,86 @@ import (
 
 func main() {
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	cliMode := flag.Bool("cli", false, "Rodar em modo CLI (terminal) sem servidor web")
+	filePath := flag.String("file", "", "Caminho do arquivo CSV para processar (obrigatório no modo -cli)")
+
+	flag.Parse()
+
+	var logOutput *os.File
+	if *cliMode {
+		logOutput = os.Stderr
+	} else {
+		logOutput = os.Stdout
+	}
+
+	logger := slog.New(slog.NewJSONHandler(logOutput, nil))
 
 	slog.SetDefault(logger)
-	sseBroker := web.NewBroker()
 
+	if *cliMode {
+		if *filePath == "" {
+			slog.Error("Erro: No modo -cli, forneça o arquivo: -file=\"dados.csv\"")
+			os.Exit(1)
+		}
+		runCLI(logger, *filePath)
+		return
+	}
+
+	runServer()
+
+}
+
+func runCLI(logger *slog.Logger, path string) {
+	start := time.Now()
+
+	logger.Info("CLI: Iniciando DataProfiler", "mode", "streaming", "file", path)
+
+	file, err := os.Open(path)
+	if err != nil {
+		logger.Error("Falha ao abrir arquivo", "path", path, "error", err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt)
+		<-sigChan
+		logger.Warn("Interrupção recebida! Cancelando processamento...")
+		cancel()
+	}()
+
+	headers, dataChan, err := infra.ParseDataAsync(ctx, logger, file)
+	if err != nil {
+		logger.Error("Erro crítico na análise do arquivo", "error", err)
+		os.Exit(1)
+	}
+
+	result := profiler.ProfileAsync(logger, headers, dataChan, fileInfo.Name())
+
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+
+	os.Stderr.Sync()
+
+	if err := encoder.Encode(result); err != nil {
+		logger.Error("Erro ao gerar JSON final", "error", err)
+		os.Exit(1)
+	}
+
+	logger.Info("Processamento finalizado",
+		"duration", time.Since(start).String(),
+		"rows", result.TotalMaxRows,
+	)
+}
+
+func runServer() {
+	sseBroker := web.NewBroker()
 	go func() {
 		slog.Info("🔧 Servidor Debug/Pprof iniciado", "addr", "localhost:6060")
 		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
@@ -62,7 +138,6 @@ func main() {
 	go func() {
 
 		time.Sleep(1 * time.Second)
-
 		slog.Info("Abrindo navegador automaticamente...")
 		openBrowser("http://localhost:8080")
 	}()
@@ -331,40 +406,3 @@ func CORSMiddleware(next http.Handler) http.Handler {
 	})
 
 }
-
-/**
-import (
-	"encoding/json"
-	"fmt"
-	"os"
-
-	"github.com/JGustavoCN/dataprofiler/internal/infra"
-	"github.com/JGustavoCN/dataprofiler/internal/profiler"
-)
-
-func main() {
-	filePath := "produtos_teste.csv"
-
-	fmt.Println("🚀 Iniciando DataProfiler...")
-	fmt.Printf("📂 Lendo arquivo: %s\n", filePath)
-
-	columns, fileName, err := infra.LoadCSV(filePath)
-	if err != nil {
-		fmt.Printf("❌ Erro ao ler arquivo: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Printf("✅ Sucesso! %d colunas carregadas.\n", len(columns))
-	fmt.Println("🧠 Iniciando análise dos dados...")
-
-	result := profiler.Profile(columns, fileName)
-
-	jsonOutput, err := json.MarshalIndent(result, "", "  ")
-	if err != nil {
-		fmt.Printf("❌ Erro ao gerar JSON: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("📊 Relatório Final:")
-	fmt.Println(string(jsonOutput))
-}*/
