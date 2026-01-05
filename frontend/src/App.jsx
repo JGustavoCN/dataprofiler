@@ -88,7 +88,7 @@ function App() {
 
   useEffect(() => {
     console.log("[1] 🔌 Iniciando conexão SSE (Montagem)...");
-    let source = new EventSource("http://localhost:8080/events");
+    let source = new EventSource("/events");
 
     sseSourceRef.current = source;
 
@@ -194,7 +194,7 @@ function App() {
     });
 
     try {
-      const response = await fetch("http://localhost:8080/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
         signal: controller.signal,
