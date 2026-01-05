@@ -46,7 +46,7 @@ func ParseData(logger *slog.Logger, file io.Reader) ([]profiler.Column, error) {
 		return nil, err
 	}
 
-	bufferedSmartReader := bufio.NewReader(smartReader)
+	bufferedSmartReader := bufio.NewReaderSize(smartReader, 1024*1024)
 
 	separator, err := DetectSeparator(bufferedSmartReader)
 	if err != nil {
@@ -104,7 +104,7 @@ func ParseDataAsync(ctx context.Context, logger *slog.Logger, r io.Reader) ([]st
 		return nil, nil, err
 	}
 
-	bufferedSmartReader := bufio.NewReader(smartReader)
+	bufferedSmartReader := bufio.NewReaderSize(smartReader, 1024*1024)
 	isJson, err := sniffJSON(bufferedSmartReader)
 	if err != nil {
 		return nil, nil, fmt.Errorf("erro ao detectar formato: %w", err)
@@ -138,7 +138,7 @@ func sniffJSON(r *bufio.Reader) (bool, error) {
 }
 
 func parseCSVAsync(ctx context.Context, logger *slog.Logger, reader *bufio.Reader) ([]string, <-chan profiler.StreamData, error) {
-	out := make(chan profiler.StreamData, 100)
+	out := make(chan profiler.StreamData, 1000)
 
 	separator, err := DetectSeparator(reader)
 	if err != nil {
@@ -215,7 +215,7 @@ func parseCSVAsync(ctx context.Context, logger *slog.Logger, reader *bufio.Reade
 }
 
 func parseJSONLAsync(ctx context.Context, logger *slog.Logger, reader *bufio.Reader) ([]string, <-chan profiler.StreamData, error) {
-	out := make(chan profiler.StreamData, 100)
+	out := make(chan profiler.StreamData, 1000)
 
 	scanner := bufio.NewScanner(reader)
 
@@ -307,7 +307,7 @@ func parseJSONLAsync(ctx context.Context, logger *slog.Logger, reader *bufio.Rea
 }
 
 func NewSmartReader(logger *slog.Logger, r io.Reader) (io.Reader, error) {
-	br := bufio.NewReader(r)
+	br := bufio.NewReaderSize(r, 1024*1024)
 
 	bomCheck, err := br.Peek(4)
 	if err != nil && err != io.EOF && len(bomCheck) < 2 {

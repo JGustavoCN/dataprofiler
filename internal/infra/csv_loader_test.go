@@ -23,7 +23,7 @@ func FuzzDetectSeparator(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, input string) {
 		reader := strings.NewReader(input)
-		_, _ = DetectSeparator(bufio.NewReader(reader))
+		_, _ = DetectSeparator(bufio.NewReaderSize(reader, 1024*1024))
 	})
 }
 
@@ -237,14 +237,14 @@ func TestSmartReader(t *testing.T) {
 
 func TestSniffer(t *testing.T) {
 	csvContent := "nome,idade\nJoao,30"
-	readerCSV := bufio.NewReader(strings.NewReader(csvContent))
+	readerCSV := bufio.NewReaderSize(strings.NewReader(csvContent), 1024*1024)
 	isJSON, _ := sniffJSON(readerCSV)
 	if isJSON {
 		t.Error("Detectou CSV como JSON incorretamente")
 	}
 
 	jsonContent := `{"nome": "Joao", "idade": 30}`
-	readerJSON := bufio.NewReader(strings.NewReader(jsonContent))
+	readerJSON := bufio.NewReaderSize(strings.NewReader(jsonContent), 1024*1024)
 	isJSON, _ = sniffJSON(readerJSON)
 	if !isJSON {
 		t.Error("Falhou ao detectar JSONL válido")
@@ -252,7 +252,7 @@ func TestSniffer(t *testing.T) {
 
 	jsonSpace := `   
       {"nome": "Maria"}`
-	readerSpace := bufio.NewReader(strings.NewReader(jsonSpace))
+	readerSpace := bufio.NewReaderSize(strings.NewReader(jsonSpace), 1024*1024)
 	isJSON, _ = sniffJSON(readerSpace)
 	if !isJSON {
 		t.Error("Falhou ao detectar JSONL com espaços iniciais")

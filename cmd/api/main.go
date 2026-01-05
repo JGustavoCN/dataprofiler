@@ -135,8 +135,8 @@ func runServer() {
 	srv := &http.Server{
 		Addr:         ":8080",
 		Handler:      handlerComCORS,
-		ReadTimeout:  5 * time.Minute,
-		WriteTimeout: 5 * time.Minute,
+		ReadTimeout:  15 * time.Minute,
+		WriteTimeout: 15 * time.Minute,
 		IdleTimeout:  600 * time.Second,
 	}
 	go func() {
@@ -241,10 +241,10 @@ func uploadHandlerStreaming(w http.ResponseWriter, r *http.Request, broker *web.
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Minute)
 	defer cancel()
 
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		log.Error("Erro parse form", "error", err)
 		http.Error(w, "Erro", http.StatusBadRequest)
 		return
@@ -316,10 +316,10 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Minute)
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Minute)
 	defer cancel()
 
-	if err := r.ParseMultipartForm(10 << 20); err != nil {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		log.Error("Erro parse form", "error", err)
 		http.Error(w, "Erro", http.StatusBadRequest)
 		return
@@ -386,7 +386,7 @@ func uploadHandlerDeprecated(w http.ResponseWriter, r *http.Request) {
 	case <-ctx.Done():
 		log.Warn("Timeout no processamento",
 			"filename", handler.Filename,
-			"timeout_limit", "10m",
+			"timeout_limit", "15m",
 			"duration_elapsed", time.Since(start).String(),
 		)
 		http.Error(w, "O processamento demorou demais e foi cancelado.", http.StatusGatewayTimeout)

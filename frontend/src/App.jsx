@@ -180,7 +180,7 @@ function App() {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 300000);
+    const timeoutId = setTimeout(() => controller.abort(), 900000);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -236,7 +236,7 @@ function App() {
 
       if (err.name === "AbortError") {
         userMessage =
-          "O processamento demorou muito (Timeout 5min) e foi cancelado.";
+          "O processamento demorou muito (Timeout 15min) e foi cancelado.";
       } else if (err.message === "Failed to fetch") {
         userMessage =
           "Servidor Offline ou Inacessível. Verifique se o Backend Go está rodando.";
