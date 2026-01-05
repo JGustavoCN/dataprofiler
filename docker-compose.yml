@@ -1,0 +1,28 @@
+services:
+  # ===============================
+  # Serviço padrão (Servidor Web)
+  # ===============================
+  app:
+    build: .
+    container_name: dataprofiler_app
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=production
+    restart: unless-stopped
+
+  # ===============================
+  # Serviço de Benchmark (Task 7.2)
+  # ===============================
+  benchmark:
+    build: .
+    container_name: dataprofiler_bench
+    profiles:
+      - test
+    mem_limit: 512m
+    cpus: "1.0"
+
+    volumes:
+      - ./large_dataset.csv:/data.csv
+
+    command: ["./dataprofiler", "-cli", "-file", "/data.csv"]

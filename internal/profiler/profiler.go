@@ -71,14 +71,10 @@ func ProfileAsync(logger *slog.Logger, headers []string, dataChan <-chan StreamD
 		accumulators[i] = NewColumnAccumulator(name)
 	}
 
-	// --- CONFIGURAÇÃO DO PREVIEW (SAMPLING DE LINHAS) ---
 	const previewSize = 50
 	sampleRows := make([][]string, 0, previewSize)
-
-	// Inicializa o gerador aleatório (Go 1.22+)
 	seed := uint64(time.Now().UnixNano())
 	rng := rand.New(rand.NewPCG(seed, seed+1))
-	// ----------------------------------------------------
 
 	rowCount := 0
 	dirtyLines := []DirtyLine{}

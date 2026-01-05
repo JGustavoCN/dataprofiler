@@ -1,0 +1,54 @@
+# --- 1. Controle de Versão e IDEs ---
+.git
+.gitignore
+.vscode
+.idea
+**/.DS_Store
+
+# --- 2. Binários e Compilados (CRUCIAL) ---
+# Ignora o binário Windows de 9MB que está na sua raiz
+dataprofiler.exe
+# Ignora outros artefatos de compilação local
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+bin/
+vendor/
+
+# --- 3. Frontend (React/Vite) ---
+# Ignora node_modules local para forçar instalação limpa no Docker (Linux)
+frontend/node_modules
+# Ignora o build local
+frontend/dist
+# Ignora cache do Vite e logs
+frontend/.vite
+frontend/.vite-temp
+frontend/npm-debug.log*
+frontend/yarn-error.log*
+frontend/coverage
+
+# --- 4. Arquivos de Profiling e Logs (Baseado no seu 'ls') ---
+# Ignora todos os arquivos heap_*.out e cpu_*.out (aprox. 30MB total)
+*.out
+*.log
+*.prof
+tmp/
+
+# --- 5. Dados e Arquivos Temporários ---
+# Ignora o arquivo de estrutura que você me enviou
+exemple.txt
+# Ignora o arquivo de logs JSONL (server.jsonl)
+*.jsonl
+# Ignora CSVs grandes (como o 'pequeno_teste_profiler_caos.csv' de 7.5MB)
+*.csv
+
+# --- 6. Exceções (Arquivos que DEVEM ir) ---
+# Permite CSVs apenas dentro da pasta de testes (se houver necessidade nos testes unitários)
+!internal/infra/testdata/**/*.csv
+
+# --- 7. Configurações de Ambiente (Segurança) ---
+# Nunca envie seu .env local para a imagem
+.env
+.env.local
