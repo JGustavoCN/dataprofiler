@@ -10,6 +10,9 @@
 ![Go Version](https://img.shields.io/badge/Go-1%2E25%2E4-00ADD8?style=for-the-badge&logo=go)
 ![React Version](https://img.shields.io/badge/React-19%2E2-61DAFB?style=for-the-badge&logo=react)
 ![MUI Version](https://img.shields.io/badge/MUI-7%2E3-007FFF?style=for-the-badge&logo=mui)
+[![Documentation](https://img.shields.io/badge/Docs-Read%20Now-blue?style=for-the-badge&logo=materialformkdocs)](https://jgustavocn.github.io/dataprofiler/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](https://github.com/JGustavoCN/dataprofiler/blob/main/LICENSE)
+[![Render](https://img.shields.io/badge/Render-Test%20Now-blue?style=for-the-badge&?&logo=render&logoColor=white)](https://dataprofiler-jgustavocn.onrender.com)
 
 > **Live Demo:** [https://dataprofiler-jgustavocn.onrender.com](https://dataprofiler-jgustavocn.onrender.com) > _Nota: Hospedado em plano gratuito (Render). Pode haver "Cold Start" de ~50s e limitações de CPU._
 
