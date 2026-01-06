@@ -8,14 +8,15 @@ CMD_DIR=cmd/api
 
 # .PHONY diz ao Make que esses não são arquivos reais
 .PHONY: setup install-tools run run-front build build-all build-windows test test-race test-fuzz fmt \
-        frontend-install frontend-build docker-build docker-run benchmark clean profile-heap
+        frontend-install frontend-build docker-build docker-run benchmark clean profile-heap \
+		docs-install docs-serve docs-build release
 
 # ==========================================
 # 🚀 Workflow Diário (Daily Driver)
 # ==========================================
 
 # Prepara a máquina (Instala deps do Go, do React e ferramentas extras como rsrc)
-setup: install-tools frontend-install
+setup: install-tools frontend-install docs-install
 	go mod tidy
 
 # Roda o Backend
@@ -25,6 +26,33 @@ run:
 # Roda o Frontend
 run-front:
 	cd $(FRONTEND_DIR) && npm run dev
+
+# ==========================================
+# 📚 Documentação (MkDocs)
+# ==========================================
+
+# Instala o MkDocs e o tema Material via Python
+docs-install:
+	@echo "📚 Instalando dependencias de documentacao..."
+	pip install mkdocs mkdocs-material
+
+# Roda o servidor local de documentação (Hot Reload)
+# Usa 'python -m' para evitar problemas de PATH no Windows
+docs-serve:
+	@echo "📖 Iniciando servidor de documentacao em http://127.0.0.1:8000"
+	python -m mkdocs serve
+
+# Gera o site estático na pasta /site (para deploy)
+docs-build:
+	@echo "🔨 Compilando site estatico..."
+	python -m mkdocs build
+	@echo "✅ Documentacao gerada na pasta 'site/'"
+
+# Publica no GitHub Pages
+docs-deploy:
+	@echo "🚀 Publicando documentacao no GitHub Pages..."
+	python -m mkdocs gh-deploy --force
+	@echo "✅ Documentacao publicada! Acesse em: https://jgustavocn.github.io/dataprofiler/"
 
 # ==========================================
 # 🏗️ Build & Distribuição

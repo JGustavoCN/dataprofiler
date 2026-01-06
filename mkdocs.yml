@@ -1,0 +1,73 @@
+site_name: DataProfiler Docs
+site_url: https://jgustavocn.github.io/dataprofiler/
+repo_url: https://github.com/JGustavoCN/dataprofiler
+repo_name: JGustavoCN/dataprofiler
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  language: pt-BR
+  palette:
+    # Modo Claro (Padrão)
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Mudar para modo escuro
+    # Modo Escuro
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Mudar para modo claro
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+extra_css:
+  - stylesheets/home.css
+
+# ==========================================
+# 🔧 EXTENSÕES
+# ==========================================
+markdown_extensions:
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - attr_list
+
+# ==========================================
+# 📜 JAVASCRIPT EXTRA (Obrigatório)
+# ==========================================
+extra_javascript:
+  - https://unpkg.com/mermaid/dist/mermaid.min.js
+
+nav:
+  - Home: index.md
+  - Guia do Usuário:
+      - Instalação: guia-usuario/instalacao.md
+      - Funcionalidades: guia-usuario/funcionalidades.md
+  - Engenharia:
+      - Arquitetura Streaming: engenharia/arquitetura-streaming.md
+  - Diário de Decisões (ADR):
+      - Stack de Documentação: decisoes/001-escolha-documentacao.md
