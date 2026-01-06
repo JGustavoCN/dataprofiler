@@ -39,3 +39,5 @@ dataprofiler.exe
 
 *.log
 tmp/
+
+site/
