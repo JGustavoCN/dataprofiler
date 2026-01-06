@@ -1,0 +1,1395 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://jgustavocn.github.io/dataprofiler/decisoes/001-escolha-documentacao/">
+      
+      
+        <link rel="prev" href="../../engenharia/arquitetura-streaming/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Stack de Documentação - DataProfiler Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/home.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#decisao-de-arquitetura-001-stack-de-documentacao" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="DataProfiler Docs" class="md-header__button md-logo" aria-label="DataProfiler Docs" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            DataProfiler Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Stack de Documentação
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Mudar para modo escuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Mudar para modo escuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="blue"  aria-label="Mudar para modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Mudar para modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JGustavoCN/dataprofiler" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JGustavoCN/dataprofiler
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guia-usuario/instalacao/" class="md-tabs__link">
+          
+  
+  
+  Guia do Usuário
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../engenharia/arquitetura-streaming/" class="md-tabs__link">
+          
+  
+  
+  Engenharia
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Diário de Decisões (ADR)
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="DataProfiler Docs" class="md-nav__button md-logo" aria-label="DataProfiler Docs" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    DataProfiler Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JGustavoCN/dataprofiler" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JGustavoCN/dataprofiler
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guia do Usuário
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guia do Usuário
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guia-usuario/instalacao/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instalação
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guia-usuario/funcionalidades/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Funcionalidades
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Engenharia
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Engenharia
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../engenharia/arquitetura-streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitetura Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Diário de Decisões (ADR)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Diário de Decisões (ADR)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stack de Documentação
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stack de Documentação
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-o-contexto-o-problema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. O Contexto (O Problema)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. O Contexto (O Problema)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os-drivers-da-decisao-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os Drivers da Decisão (Requisitos)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-opcoes-consideradas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Opções Consideradas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Opções Consideradas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opcao-a-docusaurus-metafacebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opção A: Docusaurus (Meta/Facebook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#opcao-b-mkdocs-material-theme-escolhida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opção B: MkDocs + Material Theme (Escolhida)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criterios-de-desempate-matriz-de-decisao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critérios de Desempate (Matriz de Decisão)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-a-solucao-tecnica-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. A Solução Técnica (Implementação)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. A Solução Técnica (Implementação)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-o-desafio-do-ambiente-the-path-saga" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 O Desafio do Ambiente (The PATH Saga)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-a-camada-de-abstracao-makefile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 A Camada de Abstração (Makefile)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-snippet-de-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Snippet de Implementação
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-diagramas-e-visualizacao-diagrams-as-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Diagramas e Visualização (Diagrams as Code)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Diagramas e Visualização (Diagrams as Code)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-a-decisao-mermaidjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 A Decisão: Mermaid.js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-configuracao-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Configuração Técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-estrategia-de-deploy-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Estratégia de Deploy (CI/CD)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Estratégia de Deploy (CI/CD)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-infraestrutura-github-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Infraestrutura: GitHub Pages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-mecanismo-de-deploy-automacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Mecanismo de Deploy (Automação)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-o-contexto-o-problema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. O Contexto (O Problema)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. O Contexto (O Problema)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#os-drivers-da-decisao-requisitos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Os Drivers da Decisão (Requisitos)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-opcoes-consideradas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Opções Consideradas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Opções Consideradas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#opcao-a-docusaurus-metafacebook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opção A: Docusaurus (Meta/Facebook)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#opcao-b-mkdocs-material-theme-escolhida" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opção B: MkDocs + Material Theme (Escolhida)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criterios-de-desempate-matriz-de-decisao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critérios de Desempate (Matriz de Decisão)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-a-solucao-tecnica-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. A Solução Técnica (Implementação)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. A Solução Técnica (Implementação)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-o-desafio-do-ambiente-the-path-saga" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 O Desafio do Ambiente (The PATH Saga)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-a-camada-de-abstracao-makefile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 A Camada de Abstração (Makefile)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-snippet-de-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Snippet de Implementação
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-diagramas-e-visualizacao-diagrams-as-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Diagramas e Visualização (Diagrams as Code)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Diagramas e Visualização (Diagrams as Code)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-a-decisao-mermaidjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 A Decisão: Mermaid.js
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-configuracao-tecnica" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Configuração Técnica
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-estrategia-de-deploy-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Estratégia de Deploy (CI/CD)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Estratégia de Deploy (CI/CD)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-infraestrutura-github-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Infraestrutura: GitHub Pages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-mecanismo-de-deploy-automacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Mecanismo de Deploy (Automação)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="decisao-de-arquitetura-001-stack-de-documentacao">Decisão de Arquitetura 001: Stack de Documentação</h1>
+<ul>
+<li><strong>Status:</strong> Aceito</li>
+<li><strong>Data:</strong> 06-01-2026</li>
+<li><strong>Contexto:</strong> Engenharia &amp; Gestão de Conhecimento</li>
+</ul>
+<h2 id="1-o-contexto-o-problema">1. O Contexto (O Problema)</h2>
+<p>O projeto <em>DataProfiler</em> nasceu com um desafio atípico para softwares em fase inicial: a <strong>alta densidade de conhecimento prévio</strong>. Diferente de projetos que começam com uma página em branco, iniciamos o desenvolvimento com um legado de conhecimento bruto estimado em mais de <strong>550 páginas</strong> de anotações técnicas, regras de negócio e estudos de viabilidade.</p>
+<p>Esse volume massivo de informação trouxe riscos imediatos para a escalabilidade do projeto:</p>
+<ol>
+<li><strong>Fragmentação:</strong> O conhecimento estava disperso em arquivos de texto soltos e anotações pessoais, dificultando a consulta rápida ("Onde está aquela regra sobre Regex de CPF?").</li>
+<li><strong>Dessincronia:</strong> Manter a documentação separada do código (ex: em um Google Docs ou Word) criaria, inevitavelmente, uma documentação obsoleta. À medida que o código Go evoluísse, o documento estático morreria.</li>
+<li><strong>Complexidade de Manutenção:</strong> Gerenciar 550 páginas sem uma estrutura de navegação hierárquica (Menu Lateral, Categorias) tornaria o consumo da informação inviável para novos desenvolvedores ou stakeholders.</li>
+</ol>
+<h3 id="os-drivers-da-decisao-requisitos">Os Drivers da Decisão (Requisitos)</h3>
+<p>Para mitigar esses riscos, estabelecemos que a solução de documentação precisaria atender estritamente aos seguintes critérios de arquitetura:</p>
+<ul>
+<li><strong>Filosofia "Docs as Code":</strong> A documentação deve ser tratada como software. Ela deve viver no mesmo repositório do código fonte, passar por Code Review e ser versionada (Git).</li>
+<li><strong>Versionamento (Git):</strong> Necessidade de rastrear a evolução das decisões. Se mudarmos a arquitetura do Backend amanhã, a documentação deve ter um <em>commit</em> associado explicando o porquê.</li>
+<li><strong>Baixa Fricção de Escrita (Markdown):</strong> A ferramenta não poderia exigir conhecimentos complexos de HTML/CSS para escrever uma página simples. O foco deve ser no <em>conteúdo</em>, não na diagramação.</li>
+<li><strong>Suporte a Diagramas:</strong> Devido à complexidade dos fluxos de dados (Streaming, Channels, Goroutines), a ferramenta precisaria renderizar diagramas de arquitetura nativamente (ex: Mermaid.js) sem depender de imagens estáticas <code>.png</code> que ficam desatualizadas.</li>
+</ul>
+<h2 id="2-opcoes-consideradas">2. Opções Consideradas</h2>
+<p>Para a implementação da estratégia de "Docs as Code", avaliamos as duas principais ferramentas líderes de mercado. A análise focou no equilíbrio entre <em>manutenibilidade</em> (facilidade de manter o sistema rodando) e <em>produtividade</em> (velocidade para migrar as 550 páginas de conteúdo legado).</p>
+<h3 id="opcao-a-docusaurus-metafacebook">Opção A: Docusaurus (Meta/Facebook)</h3>
+<p>Ferramenta baseada em React/Node.js.</p>
+<ul>
+<li><strong>Atratividade:</strong> Como nosso Frontend (Client) utiliza React, esta seria a escolha "natural" para manter a stack unificada. Permite customização visual infinita, tratando páginas como componentes.</li>
+<li><strong>O Bloqueio:</strong> Introduz <strong>complexidade acidental</strong>. O Docusaurus exige que a documentação seja tratada como uma aplicação React completa. Para um projeto onde o foco é organizar regras de negócio complexas, gastar tempo "programando o layout da documentação" foi considerado um desvio de prioridade.</li>
+</ul>
+<h3 id="opcao-b-mkdocs-material-theme-escolhida">Opção B: MkDocs + Material Theme (Escolhida)</h3>
+<p>Ferramenta baseada em Python, configurada via YAML.</p>
+<ul>
+<li><strong>Atratividade:</strong> Filosofia "Conteúdo Primeiro". O motor transforma arquivos Markdown puros em um site estático sem necessidade de codificação HTML/JS.</li>
+<li><strong>O Diferencial:</strong> O tema <em>Material for MkDocs</em> oferece nativamente recursos de UX avançados (Busca Instantânea, Dark Mode, Navegação em Abas) que no Docusaurus exigiriam configuração manual ou plugins.</li>
+</ul>
+<h3 id="criterios-de-desempate-matriz-de-decisao">Critérios de Desempate (Matriz de Decisão)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Critério</th>
+<th style="text-align: left;">Docusaurus (React)</th>
+<th style="text-align: left;">MkDocs (Python)</th>
+<th style="text-align: left;">Vencedor para o DataProfiler</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Configuração</strong></td>
+<td style="text-align: left;">Imperativa (Code/JSX)</td>
+<td style="text-align: left;">Declarativa (YAML)</td>
+<td style="text-align: left;"><strong>MkDocs</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Curva de Aprendizado</strong></td>
+<td style="text-align: left;">Média (Exige saber React)</td>
+<td style="text-align: left;">Baixa (Apenas Markdown)</td>
+<td style="text-align: left;"><strong>MkDocs</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Diagramas</strong></td>
+<td style="text-align: left;">Plugins externos</td>
+<td style="text-align: left;">Nativo (Mermaid.js via Superfences)</td>
+<td style="text-align: left;"><strong>MkDocs</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Objetivo</strong></td>
+<td style="text-align: left;">Criar portais customizados</td>
+<td style="text-align: left;">Organizar conhecimento denso</td>
+<td style="text-align: left;"><strong>MkDocs</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Veredito:</strong> A escolha pelo <strong>MkDocs</strong> foi técnica e estratégica. Dado o volume de 550+ tópicos, a prioridade absoluta é a velocidade de escrita e organização hierárquica, sacrificando a liberdade criativa de design em prol de uma estrutura rígida, porém funcional e padronizada.</p>
+<h2 id="3-a-solucao-tecnica-implementacao">3. A Solução Técnica (Implementação)</h2>
+<p>A escolha da ferramenta foi apenas o primeiro passo. A implementação prática em ambiente Windows revelou desafios de configuração que poderiam prejudicar a experiência do desenvolvedor (DX) e dificultar o <em>onboarding</em> de novos membros no futuro.</p>
+<h3 id="31-o-desafio-do-ambiente-the-path-saga">3.1 O Desafio do Ambiente (The PATH Saga)</h3>
+<p>Ao instalar o MkDocs via <code>pip</code> no Windows, o executável frequentemente não é adicionado automaticamente às variáveis de ambiente (PATH).</p>
+<ul>
+<li><strong>O Sintoma:</strong> Ao digitar <code>mkdocs serve</code> no terminal, o sistema retornava o erro: <em>"O termo 'mkdocs' não é reconhecido..."</em>.</li>
+<li><strong>A Solução Frágil:</strong> Poderíamos editar manualmente as Variáveis de Ambiente do Windows.</li>
+<li><strong>O Risco:</strong> Isso cria uma dependência da configuração da máquina local ("Works on my machine"). Se formatarmos o PC, perdemos a capacidade de rodar a doc.</li>
+</ul>
+<h3 id="32-a-camada-de-abstracao-makefile">3.2 A Camada de Abstração (Makefile)</h3>
+<p>Para resolver a fragilidade do ambiente, decidimos <strong>não invocar o binário do MkDocs diretamente</strong>. Em vez disso, utilizamos o <code>Makefile</code> (já presente no projeto devido ao Go) como um "controle remoto" ou <em>wrapper</em>.</p>
+<p>Adotamos a estratégia de invocar o módulo Python diretamente (<code>python -m mkdocs</code>). Isso garante que, se o Python estiver instalado, a documentação vai rodar, ignorando completamente se o <code>mkdocs.exe</code> está no PATH ou não.</p>
+<h3 id="33-snippet-de-implementacao">3.3 Snippet de Implementação</h3>
+<p>Abaixo, o trecho do <code>Makefile</code> que padroniza os comandos de documentação. Note a simplicidade exposta para o usuário final versus a robustez do comando real executado.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c"># ==============================================================================</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c"># DOCUMENTATION (Docs as Code)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c"># ==============================================================================</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c"># Instala as dependências listadas no requirements.txt (MkDocs + Tema Material + Plugins)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nf">docs-install</span><span class="o">:</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements.txt
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c"># Roda o servidor local com Hot-Reload (Atualiza ao salvar o arquivo)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c"># Uso: python -m mkdocs garante execução mesmo sem PATH configurado no Windows</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nf">docs-serve</span><span class="o">:</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>mkdocs<span class="w"> </span>serve
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c"># Compila o site estático para a pasta &quot;site/&quot; (Usado antes do deploy)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nf">docs-build</span><span class="o">:</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>mkdocs<span class="w"> </span>build
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c"># Faz o deploy manual para o GitHub Pages</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="nf">docs-deploy</span><span class="o">:</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>mkdocs<span class="w"> </span>gh-deploy<span class="w"> </span>--force
+</code></pre></div>
+<p><strong>Resultado</strong>: O desenvolvedor não precisa saber comandos Python ou configurar PATHs complexos. Ele apenas digita make docs-serve e o ambiente funciona. Reduzimos a carga cognitiva e aumentamos a confiabilidade do processo.</p>
+<h2 id="4-diagramas-e-visualizacao-diagrams-as-code">4. Diagramas e Visualização (Diagrams as Code)</h2>
+<p>Uma documentação de engenharia robusta depende de fluxogramas e diagramas de arquitetura claros. No entanto, o método tradicional (criar imagens em ferramentas externas como Visio ou Lucidchart, exportar como <code>.png</code> e colar no Markdown) gera um <strong>Débito Técnico de Documentação</strong> imediato:</p>
+<ul>
+<li><strong>Imagens binárias não são versionáveis:</strong> O Git não consegue mostrar o "diff" (o que mudou) dentro de uma imagem PNG.</li>
+<li><strong>Obsolescência Rápida:</strong> Se a lógica do código muda, o diagrama torna-se "mentiroso" pois o esforço para recriar a imagem é alto.</li>
+</ul>
+<h3 id="41-a-decisao-mermaidjs">4.1 A Decisão: Mermaid.js</h3>
+<p>Para resolver isso, adotamos o <strong>Mermaid.js</strong>, uma ferramenta que renderiza gráficos vetoriais diretamente no navegador a partir de definições de texto simples. Isso estende a filosofia "Docs as Code" para a parte visual.</p>
+<p><strong>Comparativo de Manutenção:</strong></p>
+<ul>
+<li><strong>Legado (Imagem):</strong> Abrir software gráfico -&gt; Editar -&gt; Exportar -&gt; Substituir arquivo -&gt; Commit.</li>
+<li><strong>Atual (Mermaid):</strong> Editar texto no Markdown -&gt; Commit.</li>
+</ul>
+<p><strong>Exemplo Prático:</strong>
+Ao escrevermos o seguinte bloco de código:</p>
+<p>mermaid
+graph LR
+A[Usuário] --&gt;|Upload| B(Go Backend)
+B --&gt;|Processa| C{Sucesso?}
+C --&gt;|Sim| D[Retorna JSON]
+C --&gt;|Não| E[Retorna Erro]</p>
+<pre class="mermaid"><code>    graph LR
+      A[Usuário] --&gt;|Upload| B(Go Backend)
+      B --&gt;|Processa| C{Sucesso?}
+      C --&gt;|Sim| D[Retorna JSON]
+      C --&gt;|Não| E[Retorna Erro]</code></pre>
+<p>O MkDocs intercepta esse bloco e desenha o fluxograma automaticamente na tela do usuário final.</p>
+<h3 id="42-configuracao-tecnica">4.2 Configuração Técnica</h3>
+<p>Para que o MkDocs entenda essa sintaxe especial (e não a trate como código comum), realizamos duas configurações de infraestrutura:</p>
+<ol>
+<li><strong>No Build (<code>mkdocs.yml</code>):</strong> Ativação da extensão <code>pymdownx.superfences</code>. É ela que permite injetar scripts (como o do Mermaid) dentro de blocos de código cercados (fences).</li>
+<li><strong>No Editor (<code>.vscode/settings.json</code>):</strong> Ajuste das configurações do workspace para que o <em>linter</em> (verificador de sintaxe) do Markdown entenda que <code>mermaid</code> é uma linguagem válida, evitando falsos alertas de erro durante a escrita.</li>
+</ol>
+<h2 id="5-estrategia-de-deploy-cicd">5. Estratégia de Deploy (CI/CD)</h2>
+<p>Para garantir que a documentação esteja acessível globalmente para stakeholders e não apenas na máquina local do desenvolvedor, definimos uma estratégia de publicação baseada em hospedagem estática.</p>
+<h3 id="51-infraestrutura-github-pages">5.1 Infraestrutura: GitHub Pages</h3>
+<p>Optamos pelo <strong>GitHub Pages</strong> como plataforma de hospedagem.</p>
+<ul>
+<li><strong>Custo Zero:</strong> Integrado ao plano gratuito do GitHub.</li>
+<li><strong>HTTPS Nativo:</strong> Segurança automática sem configuração de certificados.</li>
+<li><strong>Separação de Responsabilidades (Branching Strategy):</strong></li>
+<li>Branch <code>main</code>: Contém a <strong>Fonte da Verdade</strong> (Código Fonte + Markdown Bruto).</li>
+<li>Branch <code>gh-pages</code>: Contém apenas o <strong>Artefato Compilado</strong> (HTML/CSS/JS final). Essa branch é órfã e gerenciada automaticamente pelo script de deploy.</li>
+</ul>
+<h3 id="52-mecanismo-de-deploy-automacao">5.2 Mecanismo de Deploy (Automação)</h3>
+<p>Embora o GitHub Actions seja o padrão de mercado para CI/CD, para esta fase inicial do projeto, decidimos, arquiteturalmente, <strong>não</strong> automatizar o deploy a cada <em>commit</em>.</p>
+<p><strong>Decisão: Deploy Manual Controlado ("Gatekeeper Strategy")</strong>
+Implementamos o comando <code>make docs-deploy</code> no Makefile.</p>
+<ul>
+<li><strong>O Risco da Automação Total:</strong> Um pipeline de "Deploy on Push" publicaria imediatamente qualquer alteração salva. Isso cria o risco de expor rascunhos incompletos, seções "To-Do" ou documentação de funcionalidades que ainda não foram mergeadas no código principal.</li>
+<li><strong>A Vantagem do Manual:</strong> O deploy manual devolve o controle ao engenheiro. A documentação só é atualizada em produção quando o desenvolvedor explicitamente valida o conteúdo localmente (<code>make docs-serve</code>) e decide que a versão está estável para consumo público.</li>
+</ul>
+<p><strong>Comando Técnico:</strong>
+O Makefile executa: <code>python -m mkdocs gh-deploy --force</code>
+<em>(Nota: A flag <code>--force</code> é utilizada intencionalmente para sobrescrever o histórico da branch <code>gh-pages</code>, mantendo o repositório leve e focado apenas na versão atual do site).</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+      
+    
+  </body>
+</html>

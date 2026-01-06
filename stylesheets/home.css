@@ -1,0 +1,161 @@
+/* Animação suave de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animação da Logo (Flutuando levemente) */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Estilo do HERO */
+.md-typeset .hero-section {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  background: linear-gradient(135deg, #3f51b5 0%, #2196f3 100%);
+  color: white;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Configuração da Logo */
+.hero-logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 10px rgba(10, 67, 172, 0.697));
+  animation: float 6s ease-in-out infinite;
+}
+
+.hero-section h1 {
+  color: white !important;
+  font-weight: 800;
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  margin-top: 0;
+  line-height: 1.2;
+}
+
+.hero-section p {
+  font-size: 1.25rem;
+  opacity: 0.95;
+  max-width: 700px;
+  margin: 0 auto 2.5rem auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Botões (Estilo Global para Hero e Footer) */
+.md-button--primary {
+  background-color: white !important;
+  color: #3f51b5 !important;
+  border: 2px solid white;
+  font-weight: bold;
+  border-radius: 50px;
+}
+
+.md-button--secondary {
+  background-color: transparent !important;
+  color: white !important;
+  border: 2px solid white;
+  font-weight: bold;
+  border-radius: 50px;
+}
+
+.md-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajustes Mobile */
+@media screen and (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  .hero-logo {
+    width: 80px;
+  }
+}
+
+/* Botões Customizados no Hero */
+.hero-buttons .md-button {
+  margin: 0.5rem;
+  font-weight: bold;
+  border-radius: 50px; /* Botões redondos modernos */
+  padding: 0.6rem 2rem;
+  transition: transform 0.2s;
+}
+
+.hero-buttons .md-button:hover {
+  transform: scale(1.05);
+}
+
+.hero-buttons .md-button--primary {
+  background-color: white !important;
+  color: #3f51b5 !important;
+  border: 2px solid white;
+}
+
+.hero-buttons .md-button--secondary {
+  background-color: transparent !important;
+  color: white !important;
+  border: 2px solid white;
+}
+
+/* ... (mantenha o código anterior do Hero) ... */
+
+/* === GRID DE FUNCIONALIDADES (NOVO) === */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.feature-card {
+  background-color: var(--md-default-bg-color); /* Usa a cor de fundo do tema */
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: #3f51b5; /* Cor Indigo no Hover */
+}
+
+/* Estilo do Título do Card */
+.feature-card h3 {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #3f51b5; /* Cor Indigo */
+  font-weight: 700;
+}
+
+/* Tamanho dos ícones dentro do card */
+.feature-card h3 span {
+  font-size: 1.5rem;
+}
