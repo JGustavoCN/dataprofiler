@@ -1,8 +1,58 @@
-/* Animação suave de entrada */
-@keyframes fadeIn {
+/* ==========================================================================
+   DATAPROFILER DOCS - ESTILO FINAL (Corrigido & Unificado)
+   ========================================================================== */
+
+/* --- 1. DEFINIÇÃO DE CORES (PALETA DINÂMICA) --- */
+/* Define as cores dos nós do Mermaid baseadas no tema (Claro/Escuro) */
+
+/* MODO CLARO (LIGHT) */
+:root,
+[data-md-color-scheme="default"] {
+  /* Azul (Source/Input) */
+  --node-source-bg: #e3f2fd;
+  --node-source-stroke: #1565c0;
+  --node-source-text: #0d47a1;
+
+  /* Cinza (Process/Worker) */
+  --node-process-bg: #ffffff;
+  --node-process-stroke: #546e7a;
+  --node-process-text: #263238;
+
+  /* Verde (Target/Output) */
+  --node-target-bg: #e8f5e9;
+  --node-target-stroke: #2e7d32;
+  --node-target-text: #1b5e20;
+
+  /* Linhas */
+  --edge-color: #546e7a;
+}
+
+/* MODO ESCURO (DARK/SLATE) */
+[data-md-color-scheme="slate"] {
+  /* Azul (Source/Input) - Fundo escuro, borda neon, texto branco */
+  --node-source-bg: #0d47a1;
+  --node-source-stroke: #64b5f6;
+  --node-source-text: #ffffff;
+
+  /* Cinza (Process/Worker) */
+  --node-process-bg: #37474f;
+  --node-process-stroke: #cfd8dc;
+  --node-process-text: #ffffff;
+
+  /* Verde (Target/Output) */
+  --node-target-bg: #1b5e20;
+  --node-target-stroke: #81c784;
+  --node-target-text: #ffffff;
+
+  /* Linhas - Claras para contraste */
+  --edge-color: #b0bec5;
+}
+
+/* --- 2. ANIMAÇÕES --- */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -10,152 +60,503 @@
   }
 }
 
-/* Animação da Logo (Flutuando levemente) */
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+@keyframes floatLogo {
+  0%,
   100% {
     transform: translateY(0px);
   }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
-/* Estilo do HERO */
-.md-typeset .hero-section {
-  text-align: center;
-  padding: 1rem 0.5rem;
-  background: linear-gradient(135deg, #3f51b5 0%, #2196f3 100%);
+/* --- 4. HERO SECTION --- */
+.hero-section {
+  background: radial-gradient(
+    circle at top right,
+    #2c5364 0%,
+    #203a43 50%,
+    #0f2027 100%
+  );
   color: white;
-  border-radius: 12px;
+  text-align: center;
+  padding: 2rem 1.5rem 4rem 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  animation: fadeIn 0.8s ease-out;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  /* Borda arredondada apenas embaixo (opcional) */
+  border-radius: 0 0 0 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Configuração da Logo */
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
 .hero-logo {
-  width: 100px;
-  height: auto;
-  margin-bottom: 1.5rem;
-  filter: drop-shadow(0 0 10px rgba(10, 67, 172, 0.697));
-  animation: float 6s ease-in-out infinite;
+  height: 110px;
+  width: auto;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+  animation: floatLogo 5s ease-in-out infinite;
 }
 
 .hero-section h1 {
   color: white !important;
   font-weight: 800;
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 3.5rem;
   margin-top: 0;
-  line-height: 1.2;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .hero-section p {
-  font-size: 1.25rem;
-  opacity: 0.95;
-  max-width: 700px;
-  margin: 0 auto 2.5rem auto;
+  font-size: 1.4rem;
   line-height: 1.6;
-  font-weight: 400;
+  opacity: 0.9;
+  font-weight: 300;
+  margin: 0 auto 3rem auto;
+  max-width: 700px;
 }
 
-/* Botões (Estilo Global para Hero e Footer) */
-.md-button--primary {
-  background-color: white !important;
-  color: #3f51b5 !important;
-  border: 2px solid white;
-  font-weight: bold;
-  border-radius: 50px;
+/* --- 5. BOTÕES --- */
+.hero-buttons {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.md-button--secondary {
-  background-color: transparent !important;
+.btn-hero {
+  padding: 1rem 2.5rem;
+  border-radius: 100px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.btn-primary {
+  background: #00e676;
+  color: #051e11 !important;
+  box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+  border: 2px solid transparent;
+}
+.btn-primary:hover {
+  background: #00c853;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 230, 118, 0.5);
+}
+
+/* Botão Secundário com Efeito Glassmorphism (Restaurado) */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white !important;
-  border: 2px solid white;
-  font-weight: bold;
-  border-radius: 50px;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-4px);
 }
 
-.md-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+/* --- 6. GRID DE FEATURES --- */
+.wrapper-content {
+  max-width: 1280px;
+  margin: -4rem auto 0 auto; /* Sobreposição elegante no Hero */
+  padding: 0 1.5rem 4rem 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
-/* Ajustes Mobile */
-@media screen and (max-width: 768px) {
-  .hero-section h1 {
-    font-size: 2rem;
-  }
-  .hero-logo {
-    width: 80px;
-  }
-}
-
-/* Botões Customizados no Hero */
-.hero-buttons .md-button {
-  margin: 0.5rem;
-  font-weight: bold;
-  border-radius: 50px; /* Botões redondos modernos */
-  padding: 0.6rem 2rem;
-  transition: transform 0.2s;
-}
-
-.hero-buttons .md-button:hover {
-  transform: scale(1.05);
-}
-
-.hero-buttons .md-button--primary {
-  background-color: white !important;
-  color: #3f51b5 !important;
-  border: 2px solid white;
-}
-
-.hero-buttons .md-button--secondary {
-  background-color: transparent !important;
-  color: white !important;
-  border: 2px solid white;
-}
-
-/* ... (mantenha o código anterior do Hero) ... */
-
-/* === GRID DE FUNCIONALIDADES (NOVO) === */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
-  margin-bottom: 3rem;
 }
 
 .feature-card {
-  background-color: var(--md-default-bg-color); /* Usa a cor de fundo do tema */
+  background: var(--md-default-bg-color);
   border: 1px solid var(--md-default-fg-color--lightest);
-  border-radius: 10px;
-  padding: 1.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  height: 100%;
 }
-
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  border-color: #3f51b5; /* Cor Indigo no Hover */
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: var(--md-accent-fg-color);
 }
 
-/* Estilo do Título do Card */
 .feature-card h3 {
   margin-top: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: #3f51b5; /* Cor Indigo */
+  gap: 12px;
   font-weight: 700;
+  color: var(--md-primary-fg-color);
+  font-size: 1.25rem;
+}
+.feature-card h3 span {
+  font-size: 1.8rem;
+  filter: grayscale(0.2);
+}
+.feature-card p {
+  color: var(--md-default-fg-color--light);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 0;
 }
 
-/* Tamanho dos ícones dentro do card */
-.feature-card h3 span {
-  font-size: 1.5rem;
+/* --- 7. MERMAID (CONTAINER) --- */
+
+figure {
+  width: 100%;
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mermaid {
+  background: transparent !important;
+  width: 100% !important;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+/* Força o SVG a crescer corretamente */
+.mermaid svg {
+  width: 100% !important;
+  height: auto !important;
+  max-width: none !important;
+  min-width: 800px;
+}
+
+/* --- 8. INJEÇÃO DE CORES NOS NÓS (A MÁGICA) --- */
+/* Aplica as variáveis definidas no início (Section 1) aos nós do Mermaid */
+
+/* Nó: SOURCE (Input - Azul) */
+.mermaid .source > rect,
+.mermaid .source > polygon,
+.mermaid .source > circle {
+  fill: var(--node-source-bg) !important;
+  stroke: var(--node-source-stroke) !important;
+  stroke-width: 2px !important;
+}
+.mermaid .source .nodeLabel,
+.mermaid .source .label {
+  color: var(--node-source-text) !important;
+  fill: var(--node-source-text) !important; /* SVG text fill */
+  font-weight: bold !important;
+}
+
+/* Nó: PROCESS (Worker - Cinza) */
+.mermaid .process > rect,
+.mermaid .process > polygon,
+.mermaid .process > circle {
+  fill: var(--node-process-bg) !important;
+  stroke: var(--node-process-stroke) !important;
+  stroke-width: 1px !important;
+}
+.mermaid .process .nodeLabel,
+.mermaid .process .label {
+  color: var(--node-process-text) !important;
+  fill: var(--node-process-text) !important;
+}
+
+/* Nó: TARGET (Output - Verde) */
+.mermaid .target > rect,
+.mermaid .target > polygon,
+.mermaid .target > circle {
+  fill: var(--node-target-bg) !important;
+  stroke: var(--node-target-stroke) !important;
+  stroke-width: 2px !important;
+}
+.mermaid .target .nodeLabel,
+.mermaid .target .label {
+  color: var(--node-target-text) !important;
+  fill: var(--node-target-text) !important;
+  font-weight: bold !important;
+}
+
+/* Linhas de Conexão */
+.mermaid .edgePath .path {
+  stroke: var(--edge-color) !important;
+  stroke-width: 1.5px !important;
+}
+
+/* Texto sobre as linhas */
+.mermaid .edgeLabel {
+  background-color: transparent !important;
+  color: var(--md-default-fg-color) !important;
+}
+
+/* Legenda */
+figure figcaption {
+  margin-top: 1rem;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.9rem;
+  color: var(--md-default-fg-color--light);
+  opacity: 0.8;
+}
+
+.md-typeset figure {
+  width: 100%;
+  margin: 4rem 0;
+  display: block;
+}
+
+/* --- 9. RESPONSIVIDADE MOBILE --- */
+@media screen and (max-width: 768px) {
+  .hero-section {
+    padding: 4rem 1rem 6rem 1rem;
+  }
+  .hero-section h1 {
+    font-size: 2.2rem;
+  }
+  .hero-logo {
+    height: 80px;
+  }
+  .wrapper-content {
+    margin-top: -2rem;
+  }
+  .hero-buttons {
+    flex-direction: column;
+  }
+  .btn-hero {
+    width: 100%;
+    justify-content: center;
+  }
+  .mermaid {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+}
+
+/* ==========================================================================
+   ROADMAP / JORNADA DE EVOLUÇÃO (Refinado)
+   ========================================================================== */
+
+.roadmap-section {
+  max-width: 1000px;
+  margin: 4rem auto;
+  position: relative;
+  padding: 2rem 0;
+}
+
+.roadmap-title {
+  text-align: center;
+  margin-bottom: 4rem;
+  font-weight: 700;
+  font-size: 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--node-source-text),
+    var(--node-target-text)
+  );
+
+  /* Adicione esta linha padrão para corrigir o aviso: */
+  background-clip: text;
+
+  /* Mantém a versão webkit que é essencial para o efeito funcionar no Chrome/Safari */
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+
+/* --- LINHA CENTRAL CONECTORA --- */
+.roadmap-section::before {
+  content: "";
+  position: absolute;
+  top: 80px; /* Começa logo abaixo do título */
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  background: linear-gradient(
+    to bottom,
+    var(--node-source-stroke),
+    var(--node-process-stroke) 50%,
+    var(--node-target-stroke)
+  );
+  transform: translateX(-50%);
+  border-radius: 4px;
+  opacity: 0.3;
+}
+
+/* --- CONTAINER DO PASSO --- */
+.roadmap-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+/* Alternância (Zig-Zag) */
+.roadmap-step:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+/* --- CARDS --- */
+.step-card {
+  background: var(--md-default-bg-color);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  width: 45%;
+  position: relative;
+
+  /* Borda sutil e sombra */
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Efeito de Borda no Topo (Accent) */
+.step-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: var(--node-source-stroke); /* Cor padrão */
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Hover Effect: Levantar e brilhar */
+.step-card:not(:empty):hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: var(--node-source-stroke);
+}
+
+/* Títulos e Listas */
+.step-card h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--node-process-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style-type: none; /* Remove bolinha padrão */
+}
+
+.step-card li {
+  margin-bottom: 0.5rem;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.95rem;
+  position: relative;
+}
+
+/* Custom Bullet Points */
+.step-card li::before {
+  content: "•";
+  color: var(--node-source-stroke);
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+
+/* --- MARCADORES CENTRAIS (Bolinhas) --- */
+.step-marker {
+  width: 48px;
+  height: 48px;
+  background: var(--md-default-bg-color);
+  border: 3px solid var(--node-source-stroke);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: var(--node-source-text);
+  z-index: 2; /* Ficar acima da linha */
+  box-shadow: 0 0 0 8px var(--md-default-bg-color); /* "Corta" a linha atrás */
+  transition: transform 0.3s;
+}
+
+.roadmap-step:hover .step-marker {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px var(--node-source-bg);
+}
+
+/* --- ESTILOS ESPECÍFICOS PARA O FUTURO --- */
+.step-future .step-marker {
+  border-color: var(--node-target-stroke);
+  color: var(--node-target-text);
+  background: var(--node-target-bg);
+  animation: pulse 2s infinite;
+}
+
+.step-future .step-card {
+  border: 1px dashed var(--node-target-stroke);
+  background: rgba(var(--node-target-bg), 0.1); /* Transparencia se possível */
+  opacity: 0.9;
+}
+
+.step-future .step-card::after {
+  background: var(--node-target-stroke);
+}
+
+/* Animação de Pulse para o Futuro */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(46, 125, 50, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
+  }
+}
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 768px) {
+  .roadmap-section::before {
+    left: 20px; /* Linha vai para a esquerda */
+  }
+
+  .roadmap-step,
+  .roadmap-step:nth-child(even) {
+    flex-direction: row; /* Remove o zig-zag */
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .step-card {
+    width: 100% !important; /* Card ocupa tudo */
+  }
+
+  /* Esconde os cards vazios usados para espaçamento no desktop */
+  .step-card[style*="visibility: hidden"] {
+    display: none;
+  }
+
+  .step-marker {
+    flex-shrink: 0; /* Não esmaga a bolinha */
+    margin: 0;
+  }
 }

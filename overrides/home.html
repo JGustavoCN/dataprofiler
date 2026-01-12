@@ -1,0 +1,35 @@
+{% extends "main.html" %} {% block tabs %} {{ super() }}
+
+<section class="hero-section">
+  <div class="hero-content">
+    <img
+      src="{{ 'assets/logo.svg' | url }}"
+      alt="DataProfiler Logo"
+      class="hero-logo"
+    />
+
+    <h1>DataProfiler Enterprise</h1>
+    <p>
+      Análise de Qualidade e Perfilamento de Dados processando
+      <strong>Gigabytes</strong> com consumo mínimo de RAM.
+    </p>
+
+    <div class="hero-buttons">
+      <a
+        href="{{ 'guia-usuario/instalacao/' | url }}"
+        class="btn-hero btn-primary"
+      >
+        🚀 Começar Agora
+      </a>
+      <a
+        href="{{ 'engenharia/arquitetura-streaming/' | url }}"
+        class="btn-hero btn-secondary"
+      >
+        Entender a Engenharia
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block content %}
+<div class="wrapper-content">{{ page.content }}</div>
+{% endblock %}

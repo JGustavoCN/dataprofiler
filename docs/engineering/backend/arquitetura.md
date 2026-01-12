@@ -1,4 +1,4 @@
-# 🏗️ Arquitetura de Streaming e Performance
+# Arquitetura de Streaming e Performance
 
 Esta seção descreve as decisões de engenharia que permitem ao **DataProfiler** processar arquivos massivos (GBs) mantendo uma pegada de memória mínima (MBs).  
 A arquitetura resolve o problema clássico de **Big Data em Hardware Pequeno**.

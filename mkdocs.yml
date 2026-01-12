@@ -1,73 +1,146 @@
 site_name: DataProfiler Docs
 site_url: https://jgustavocn.github.io/dataprofiler/
-repo_url: https://github.com/JGustavoCN/dataprofiler
-repo_name: JGustavoCN/dataprofiler
+site_author: JGustavo CN
+site_description: >-
+  Ferramenta de análise de dados de alta performance em Go e React.
+  Profile, analise e visualize grandes volumes de dados.
+repo_name: jgustavocn/dataprofiler
+repo_url: https://github.com/jgustavocn/dataprofiler
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2024 - 2026 JGustavoCN
 
 theme:
   name: material
-  logo: assets/logo.svg
-  favicon: assets/logo.svg
-  language: pt-BR
-  palette:
-    # Modo Claro (Padrão)
-    - scheme: slate
-      primary: indigo
-      accent: blue
-      toggle:
-        icon: material/brightness-7
-        name: Mudar para modo escuro
-    # Modo Escuro
-    - scheme: default
-      primary: indigo
-      accent: blue
-      toggle:
-        icon: material/brightness-4
-        name: Mudar para modo claro
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-    - content.tabs.link
-extra_css:
-  - stylesheets/home.css
+  custom_dir: overrides
 
-# ==========================================
-# 🔧 EXTENSÕES
-# ==========================================
+  language: pt-BR
+
+  logo: assets/logo.svg
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/logo.svg
+
+  features:
+    # --- Navegação ---
+    - navigation.tabs # Abas no topo (Estilo Produto)
+    # - navigation.tabs.sticky # Abas sempre visíveis
+    - navigation.sections # Agrupa itens no menu lateral
+    - navigation.indexes # Permite clicar nas pastas (Vital para sua estrutura)
+    - navigation.top # Botão voltar ao topo
+    - navigation.tracking # Atualiza URL ao rolar
+    - navigation.footer # Botões Próximo/Anterior
+    - navigation.instant # Carregamento instantâneo (SPA)
+    - navigation.expand # Permite abrir submenus
+
+    # --- Índice (Direita) ---
+    - toc.follow # Bolinha acompanha a leitura
+
+    # --- Conteúdo e Código ---
+    - content.code.copy # Copiar código
+    - content.code.annotate # Botões (+) no código (Seu diferencial)
+    - content.tabs.link # Sincroniza abas de código
+    - content.tooltips # Explicações ao passar o mouse
+
+    # --- Busca ---
+    - search.suggest # Autocomplete
+    - search.highlight # Grifa o encontrado
+    - search.share # Botão de compartilhar busca
+
+    # --- Social ---
+    - content.action.edit # Botão "Editar no GitHub" (Mostra transparência)
+    - content.action.view # Botão "Ver fonte"
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Mudar para modo escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: light-blue
+      toggle:
+        icon: material/weather-sunny
+        name: Mudar para modo claro
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search: # Busca otimizada para código
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - awesome-pages: # Organiza as pastas Core/Infra/App sem dor de cabeça
+      collapse_single_pages: true
+  - glightbox # Zoom nos prints do React
+  - git-revision-date-localized: # Mostra que o projeto está ativo
+      type: timeago
+  - minify: # Deixa rápido
+      minify_html: true
+  - social: # O Plugin de Cards
+      cards: true # Gera as imagens
+      cards_layout_options:
+        font_family: Roboto # Usa a mesma fonte do site
+        background_color: "#3F51B5" # Cor de fundo do card (Indigo do seu tema)
+
 markdown_extensions:
+  # --- Estrutura e Links ---
+  - toc:
+      permalink: true # Cria ícone de âncora # ao lado dos títulos
   - md_in_html
+  - attr_list # Permite centralizar imagens {: align=center }
+  - def_list # Glossários
+  - abbr # Abreviações (passar mouse para ver significado)
+  - footnotes # Notas de rodapé
+
+  # --- Visual e Alertas ---
+  - admonition # Caixas coloridas
+  - pymdownx.details # Clique para expandir
+  - pymdownx.keys # Teclas ++ctrl+c++
+  - pymdownx.mark # Marca texto ==assim==
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator:
+        !!python/name:material.extensions.emoji.to_svg # --- Código e Diagramas ---
+
+
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
-  - pymdownx.superfences:
+  - pymdownx.superfences: # Mermaid e diagramas
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets # Importar código dos arquivos .go
+
+  # --- Abas e Listas ---
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - admonition
-  - pymdownx.details
-  - attr_list
+  - pymdownx.tasklist: # Checkboxes [ ] para seu Roadmap
+      custom_checkbox: true
 
-# ==========================================
-# 📜 JAVASCRIPT EXTRA (Obrigatório)
-# ==========================================
+  # --- Matemática (StatsCalc) ---
+  - pymdownx.arithmatex:
+      generic: true
+
+# Arquivos Javascript Extras
 extra_javascript:
-  - https://unpkg.com/mermaid/dist/mermaid.min.js
+  - javascripts/mathjax.js # O script abaixo é OBRIGATÓRIO se usar navigation.instant + Matemática
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
-nav:
-  - Home: index.md
-  - Guia do Usuário:
-      - Instalação: guia-usuario/instalacao.md
-      - Funcionalidades: guia-usuario/funcionalidades.md
-  - Engenharia:
-      - Arquitetura Streaming: engenharia/arquitetura-streaming.md
-  - Diário de Decisões (ADR):
-      - Stack de Documentação: decisoes/001-escolha-documentacao.md
+# Informações de Rodapé
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/JGustavoCN
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/josé-gustavo-correia-nascimento-2100b2377 # Exemplo
+
+extra_css:
+  - stylesheets/home.css

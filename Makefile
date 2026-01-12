@@ -34,7 +34,7 @@ run-front:
 # Instala o MkDocs e o tema Material via Python
 docs-install:
 	@echo "📚 Instalando dependencias de documentacao..."
-	pip install mkdocs mkdocs-material
+	pip install -r requirements.txt
 
 # Roda o servidor local de documentação (Hot Reload)
 # Usa 'python -m' para evitar problemas de PATH no Windows
@@ -47,6 +47,12 @@ docs-build:
 	@echo "🔨 Compilando site estatico..."
 	python -m mkdocs build
 	@echo "✅ Documentacao gerada na pasta 'site/'"
+
+# Limpa a pasta de build
+docs-clean:
+	@echo "🧹 Limpando arquivos antigos..."
+	rm -rf site/
+	@echo "✅ Limpeza concluida."
 
 # Publica no GitHub Pages
 docs-deploy:
@@ -133,16 +139,16 @@ profile-heap:
 release: frontend-install frontend-build
 	@echo "🚀 Preparando release..."
 	-mkdir bin
-	
+
 	@echo "🎨 Gerando icone (rsrc)..."
 	rsrc -ico app.ico -o $(CMD_DIR)/rsrc.syso
-	
+
 	@echo "📦 Compilando para Windows (amd64)..."
 	go build -ldflags="-s -w" -o bin/dataprofiler.exe ./$(CMD_DIR)
-	
+
 	@echo "🐧 Compilando para Linux (amd64)..."
 	set GOOS=linux& set GOARCH=amd64& go build -ldflags="-s -w" -o bin/dataprofiler-linux ./$(CMD_DIR)
-	
+
 	@echo "✅ Binarios criados na pasta bin/!"
 
 # ==========================================
@@ -151,6 +157,9 @@ release: frontend-install frontend-build
 clean:
 	go clean
 	rm -f $(BINARY_NAME)
+	rm -rf bin/
 	rm -f $(CMD_DIR)/rsrc.syso
 	rm -f *.out
+	rm -rf site/
+	rm -rf .cache/
 	docker compose down --remove-orphans

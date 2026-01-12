@@ -52,3 +52,6 @@ exemple.txt
 # Nunca envie seu .env local para a imagem
 .env
 .env.local
+
+site/
+.cache/

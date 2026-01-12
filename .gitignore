@@ -41,3 +41,4 @@ dataprofiler.exe
 tmp/
 
 site/
+.cache/

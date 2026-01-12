@@ -14,12 +14,13 @@ A forma mais simples de utilizar o DataProfiler é através do conceito de **Sin
 4. O terminal se abrirá e, em seguida, seu navegador padrão abrirá automaticamente em `http://localhost:8080`.
 
 !!! warning "Alerta do Windows Defender"
-Como este é um software open-source não assinado digitalmente (o que custa caro), o Windows pode exibir a tela _"O Windows protegeu o computador"_.
 
-Isso é um **falso positivo**. Para prosseguir:
+    Como este é um software open-source não assinado digitalmente (o que custa caro), o Windows pode exibir a tela _"O Windows protegeu o computador"_.
 
-1. Clique em **"Mais informações"**.
-2. Clique no botão **"Executar assim mesmo"**.
+    Isso é um **falso positivo**. Para prosseguir:
+
+    1. Clique em **"Mais informações"**.
+    2. Clique no botão **"Executar assim mesmo"**.
 
 ### Linux / macOS
 

@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// --8<-- [start:infer_data_type]
 var (
 	// Essenciais
 	RegexFiscalKey = regexp.MustCompile(`^\d{44}$`)                          // NFe, CTe, MDFe
@@ -29,6 +30,8 @@ var (
 	RegexEmail     = regexp.MustCompile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`) // Email
 	RegexEAN       = regexp.MustCompile(`^\d{13,14}$`)                      // GTIN/EAN (Produtos)
 )
+
+// --8<-- [end:infer_data_type]
 
 func InferType(value string, headerName string) DataType {
 	if value == "" {

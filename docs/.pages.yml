@@ -1,0 +1,6 @@
+nav:
+  - Home: index.md
+  - Começando: guide # Aponta para a pasta guide
+  - Engenharia: engineering # Aponta para a pasta engineering
+  - Gestão & Roadmap: management
+  - ...
